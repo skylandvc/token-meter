@@ -8,7 +8,7 @@ Local browser dashboard for Codex and Claude Code token usage.
 
 Use the Vercel app here:
 
-https://token-meterz.vercel.app
+https://token-meterz.vercel.app/?guest=1
 
 To show each user's own local Codex / Claude Code usage in the Vercel app, start the local bridge on that user's computer first.
 
@@ -32,7 +32,7 @@ PORT=8766 python3 server.py
 
 You can also double-click `start.command` from Finder.
 
-4. Open the Vercel app and click `ローカル版から取得`.
+4. Open https://token-meterz.vercel.app/?guest=1 and click `ローカル版から取得`.
 
 ### Windows
 
@@ -55,7 +55,7 @@ python server.py
 
 You can also double-click `start-windows.bat` from Explorer.
 
-4. Open the Vercel app and click `ローカル版から取得`.
+4. Open https://token-meterz.vercel.app/?guest=1 and click `ローカル版から取得`.
 
 ### Local log dashboard
 

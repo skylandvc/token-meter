@@ -86,6 +86,12 @@ function Dashboard({ session, isPublic }) {
           <span>{isPublic ? "ログインなしで閲覧中" : session.user.email}</span>
           <a
             className="button button--light"
+            href="/?guest=1"
+          >
+            トップページ
+          </a>
+          <a
+            className="button button--light"
             href="https://github.com/skylandvc/token-meter#setup-for-employees"
             rel="noreferrer"
             target="_blank"
