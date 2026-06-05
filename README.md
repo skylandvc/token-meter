@@ -1,86 +1,107 @@
 # Token Meter
 
-Local browser dashboard for Codex and Claude Code token usage.
+Codex と Claude Code のトークン使用量を確認するためのダッシュボードです。
 
-## Run
-
-## Setup For Employees
-
-Use the Vercel app here:
+公開版:
 
 https://token-meterz.vercel.app/?guest=1
 
-To show each user's own local Codex / Claude Code usage in the Vercel app, start the local bridge on that user's computer first.
+## 社員向けセットアップ
 
-### Mac
+公開版だけでは、各自のPC内にある Codex / Claude Code のローカルログを直接読むことはできません。
 
-1. Install Python 3 if needed:
-   https://www.python.org/downloads/macos/
+自分の使用量を表示するには、各自のPCでローカル版 Token Meter を起動してから、公開版で `ローカル版から取得` を押してください。
 
-2. Clone this repository:
+公開版は、ブラウザ経由でその人のPCの `http://127.0.0.1:8766/api/usage` を読みます。
+
+## Mac の手順
+
+1. Python 3 を入れる
+
+https://www.python.org/downloads/macos/
+
+2. このリポジトリを取得する
 
 ```bash
 git clone https://github.com/skylandvc/token-meter.git
 cd token-meter
 ```
 
-3. Start the local bridge:
+3. ローカル版を起動する
 
 ```bash
 PORT=8766 python3 server.py
 ```
 
-You can also double-click `start.command` from Finder.
+Finder から `start.command` をダブルクリックして起動することもできます。
 
-4. Open https://token-meterz.vercel.app/?guest=1 and click `ローカル版から取得`.
+4. 公開版を開く
 
-### Windows
+https://token-meterz.vercel.app/?guest=1
 
-1. Install Python 3 if needed:
-   https://www.python.org/downloads/windows/
+5. `ローカル版から取得` を押す
 
-2. Clone this repository:
+## Windows の手順
+
+1. Python 3 を入れる
+
+https://www.python.org/downloads/windows/
+
+2. このリポジトリを取得する
 
 ```powershell
 git clone https://github.com/skylandvc/token-meter.git
 cd token-meter
 ```
 
-3. Start the local bridge:
+3. ローカル版を起動する
 
 ```powershell
 $env:PORT=8766
 python server.py
 ```
 
-You can also double-click `start-windows.bat` from Explorer.
+Explorer から `start-windows.bat` をダブルクリックして起動することもできます。
 
-4. Open https://token-meterz.vercel.app/?guest=1 and click `ローカル版から取得`.
+4. 公開版を開く
 
-### Local log dashboard
+https://token-meterz.vercel.app/?guest=1
+
+5. `ローカル版から取得` を押す
+
+## ローカル版だけで見る場合
 
 ```bash
-cd "/Users/yosihikokinoshita/Documents/New project/token-meter"
 python3 server.py
 ```
 
-Open http://127.0.0.1:8765.
+ブラウザで開きます。
 
-To use a different local port:
+```text
+http://127.0.0.1:8765
+```
+
+8766番ポートで起動したい場合:
 
 ```bash
 PORT=8766 python3 server.py
 ```
 
-The app is local-first and works without an internet connection after it is installed. Your current contract metadata is bundled in `static/app.js`, so plan names and prices remain visible offline. Update `CONTRACTS` in that file when your subscription changes.
+## 読み取るログ
 
-### Authenticated Vercel app
+- Codex: `~/.codex/sessions/**/*.jsonl`
+- Codex: `~/.codex/archived_sessions/**/*.jsonl`
+- Claude Code: `~/.claude/projects/**/*.jsonl`
 
-The Vercel app uses Next.js and Auth.js with Google login. Only emails that match `ALLOWED_EMAIL_DOMAINS` or `ALLOWED_EMAILS` can sign in.
+ローカル版は、上記のJSONLログを読み、日次・週次・月次・平均日次・最近のイベント・Codexのrate limit情報を集計します。
 
-Required Vercel environment variables:
+会話本文やrawログを公開サーバーへ送る設計にはしていません。
 
-```bash
+## Vercel の設定
+
+Googleログインを使う場合は、Vercel の Environment Variables に以下を設定します。
+
+```text
 AUTH_SECRET=...
 AUTH_GOOGLE_ID=...
 AUTH_GOOGLE_SECRET=...
@@ -89,56 +110,37 @@ ALLOWED_EMAILS=
 PUBLIC_ACCESS=false
 ```
 
-Set `PUBLIC_ACCESS=true` to allow access without login. Leave it unset or set it to `false` to require Google login.
-The login screen always shows both choices: Google login or guest access.
+ログインなしで見られるようにする場合:
 
-Google OAuth redirect URI:
+```text
+PUBLIC_ACCESS=true
+```
+
+Google OAuth の Redirect URI:
 
 ```text
 https://token-meterz.vercel.app/api/auth/callback/google
 ```
 
-For local Next.js development:
+## 開発者向け
+
+Next.js の公開版をローカルで起動します。
 
 ```bash
 npm install
 npm run dev
 ```
 
-### Vercel app with each user's local data
-
-Each employee can show their own local token data in the Vercel app by running the local bridge first:
+Python版のローカルAPIを起動します。
 
 ```bash
-cd "/Users/yosihikokinoshita/Documents/New project/token-meter"
 PORT=8766 python3 server.py
 ```
 
-Then open the Vercel app and click `ローカル版から取得`. The browser reads `http://127.0.0.1:8766/api/usage` from that employee's own machine.
+## 注意
 
-## What It Reads
+このアプリはローカルファーストです。
 
-- Codex: `~/.codex/sessions/**/*.jsonl` and `~/.codex/archived_sessions/**/*.jsonl`
-- Claude Code: `~/.claude/projects/**/*.jsonl`
+公開版で各自の使用量を出す場合も、ブラウザが各自のPCの `127.0.0.1:8766` を読むだけです。raw JSONLログをVercelへアップロードする設計ではありません。
 
-The API scans local JSONL logs and returns day, week, month, average daily usage, source breakdowns, recent events, and the latest Codex rate-limit gauge when available.
-
-## Limits
-
-Gauge targets are local display thresholds, not billing-plan truths. Override them with environment variables:
-
-```bash
-TOKEN_METER_DAILY_LIMIT=1000000 TOKEN_METER_WEEKLY_LIMIT=7000000 TOKEN_METER_MONTHLY_LIMIT=30000000 python3 server.py
-```
-
-Codex capacity uses the latest `rate_limits` values in Codex JSONL logs. Claude Code does not expose the same official local capacity record in the logs found so far, so the dashboard shows recent local usage unless you provide display limits:
-
-```bash
-TOKEN_METER_CLAUDE_SESSION_LIMIT=50000000 TOKEN_METER_CLAUDE_WEEKLY_LIMIT=300000000 python3 server.py
-```
-
-## Public Release Notes
-
-Before publishing, move log collection behind a small explicit importer or desktop agent. The current app is intentionally local-first because it reads private home-directory logs.
-
-Do not send raw JSONL logs to a public server. For a hosted version, keep parsing on the user's machine and upload only explicit, anonymized aggregates.
+将来的にNotion DB同期を入れる場合も、保存するのは集計済みスナップショットに限定する方針です。
