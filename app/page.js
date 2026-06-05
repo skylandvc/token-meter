@@ -21,10 +21,6 @@ function isPublicAccessEnabled() {
   return String(process.env.PUBLIC_ACCESS || "").toLowerCase() === "true";
 }
 
-function isGuestAccessEnabled() {
-  return String(process.env.ALLOW_GUEST_ACCESS || "").toLowerCase() === "true";
-}
-
 async function loginWithGoogle() {
   "use server";
   await signIn("google", { redirectTo: "/" });
@@ -35,7 +31,7 @@ async function logout() {
   await signOut({ redirectTo: "/" });
 }
 
-function LoginPage({ allowsGuest }) {
+function LoginPage() {
   return (
     <main className="login">
       <section className="login-card">
@@ -53,11 +49,9 @@ function LoginPage({ allowsGuest }) {
               Googleでログイン
             </button>
           </form>
-          {allowsGuest && (
-            <a className="button button--light" href="/?guest=1">
-              ログインせずに見る
-            </a>
-          )}
+          <a className="button button--light" href="/?guest=1">
+            ログインせずに見る
+          </a>
         </div>
       </section>
     </main>
@@ -135,12 +129,11 @@ function Dashboard({ session, isPublic }) {
 export default async function Page({ searchParams }) {
   const params = await searchParams;
   const isPublic = isPublicAccessEnabled();
-  const allowsGuest = isGuestAccessEnabled();
-  const isGuest = allowsGuest && params?.guest === "1";
+  const isGuest = params?.guest === "1";
   const session = isPublic || isGuest ? null : await auth();
 
   if (!isPublic && !isGuest && !session?.user) {
-    return <LoginPage allowsGuest={allowsGuest} />;
+    return <LoginPage />;
   }
 
   return <Dashboard session={session} isPublic={isPublic || isGuest} />;
