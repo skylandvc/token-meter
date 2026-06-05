@@ -126,6 +126,15 @@ function Dashboard({ session, isPublic }) {
       </section>
 
       <section className="panel" style={{ marginTop: 18 }}>
+        <h2>公開版の方針</h2>
+        <p className="muted">
+          Vercel版は環境変数で公開/Googleログインを切り替えられます。ローカルのCodex / Claude Codeログは
+          ブラウザから直接読めないため、次の段階でローカル集計結果をNotion DBへ同期し、
+          この画面からNotion DBの最新スナップショットを表示します。
+        </p>
+      </section>
+
+      <section className="panel" style={{ marginTop: 18 }}>
         <div>
           <p className="eyebrow">Plan & Price</p>
           <h2>契約中プラン</h2>
@@ -135,15 +144,6 @@ function Dashboard({ session, isPublic }) {
             <ContractPanel key={contract.service} contract={contract} />
           ))}
         </div>
-      </section>
-
-      <section className="panel" style={{ marginTop: 18 }}>
-        <h2>公開版の方針</h2>
-        <p className="muted">
-          Vercel版は環境変数で公開/Googleログインを切り替えられます。ローカルのCodex / Claude Codeログは
-          ブラウザから直接読めないため、次の段階でローカル集計結果をNotion DBへ同期し、
-          この画面からNotion DBの最新スナップショットを表示します。
-        </p>
       </section>
     </main>
   );
