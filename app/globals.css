@@ -88,12 +88,15 @@ h2 {
 .button {
   min-height: 42px;
   padding: 0 16px;
+  display: inline-grid;
+  place-items: center;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--ink);
   color: #fff;
   cursor: pointer;
   font-weight: 800;
+  text-decoration: none;
 }
 
 .button--light {
@@ -122,6 +125,12 @@ h2 {
 .login-card p {
   color: var(--muted);
   line-height: 1.7;
+}
+
+.login-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .grid {

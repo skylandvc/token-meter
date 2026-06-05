@@ -21,6 +21,10 @@ function isPublicAccessEnabled() {
   return String(process.env.PUBLIC_ACCESS || "").toLowerCase() === "true";
 }
 
+function isGuestAccessEnabled() {
+  return String(process.env.ALLOW_GUEST_ACCESS || "").toLowerCase() === "true";
+}
+
 async function loginWithGoogle() {
   "use server";
   await signIn("google", { redirectTo: "/" });
@@ -31,7 +35,7 @@ async function logout() {
   await signOut({ redirectTo: "/" });
 }
 
-function LoginPage() {
+function LoginPage({ allowsGuest }) {
   return (
     <main className="login">
       <section className="login-card">
@@ -43,11 +47,18 @@ function LoginPage() {
           社員メールだけがアクセスできます。許可するメールドメインは
           Vercel の環境変数 <code>ALLOWED_EMAIL_DOMAINS</code> で管理します。
         </p>
-        <form action={loginWithGoogle}>
-          <button className="button" type="submit">
-            Googleでログイン
-          </button>
-        </form>
+        <div className="login-actions">
+          <form action={loginWithGoogle}>
+            <button className="button" type="submit">
+              Googleでログイン
+            </button>
+          </form>
+          {allowsGuest && (
+            <a className="button button--light" href="/?guest=1">
+              ログインせずに見る
+            </a>
+          )}
+        </div>
       </section>
     </main>
   );
@@ -121,13 +132,16 @@ function Dashboard({ session, isPublic }) {
   );
 }
 
-export default async function Page() {
+export default async function Page({ searchParams }) {
+  const params = await searchParams;
   const isPublic = isPublicAccessEnabled();
-  const session = isPublic ? null : await auth();
+  const allowsGuest = isGuestAccessEnabled();
+  const isGuest = allowsGuest && params?.guest === "1";
+  const session = isPublic || isGuest ? null : await auth();
 
-  if (!isPublic && !session?.user) {
-    return <LoginPage />;
+  if (!isPublic && !isGuest && !session?.user) {
+    return <LoginPage allowsGuest={allowsGuest} />;
   }
 
-  return <Dashboard session={session} isPublic={isPublic} />;
+  return <Dashboard session={session} isPublic={isPublic || isGuest} />;
 }
