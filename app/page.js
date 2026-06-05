@@ -108,12 +108,6 @@ function Dashboard({ session, isPublic }) {
         </div>
       </header>
 
-      <section className="grid" aria-label="契約中プラン">
-        {CONTRACTS.map((contract) => (
-          <ContractPanel key={contract.service} contract={contract} />
-        ))}
-      </section>
-
       <LocalUsagePanel />
 
       <section className="metric-grid" aria-label="公開版データ">
@@ -129,6 +123,18 @@ function Dashboard({ session, isPublic }) {
           <span>Sync</span>
           <strong>準備中</strong>
         </article>
+      </section>
+
+      <section className="panel" style={{ marginTop: 18 }}>
+        <div>
+          <p className="eyebrow">Plan & Price</p>
+          <h2>契約中プラン</h2>
+        </div>
+        <div className="grid grid--inside" aria-label="契約中プラン">
+          {CONTRACTS.map((contract) => (
+            <ContractPanel key={contract.service} contract={contract} />
+          ))}
+        </div>
       </section>
 
       <section className="panel" style={{ marginTop: 18 }}>

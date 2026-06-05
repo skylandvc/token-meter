@@ -142,6 +142,10 @@ h2 {
   gap: 18px;
 }
 
+.grid--inside {
+  margin-top: 0;
+}
+
 .panel {
   padding: 20px;
   display: grid;
