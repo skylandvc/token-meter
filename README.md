@@ -4,6 +4,8 @@ Local browser dashboard for Codex and Claude Code token usage.
 
 ## Run
 
+### Local log dashboard
+
 ```bash
 cd "/Users/yosihikokinoshita/Documents/New project/token-meter"
 python3 server.py
@@ -18,6 +20,33 @@ PORT=8766 python3 server.py
 ```
 
 The app is local-first and works without an internet connection after it is installed. Your current contract metadata is bundled in `static/app.js`, so plan names and prices remain visible offline. Update `CONTRACTS` in that file when your subscription changes.
+
+### Authenticated Vercel app
+
+The Vercel app uses Next.js and Auth.js with Google login. Only emails that match `ALLOWED_EMAIL_DOMAINS` or `ALLOWED_EMAILS` can sign in.
+
+Required Vercel environment variables:
+
+```bash
+AUTH_SECRET=...
+AUTH_GOOGLE_ID=...
+AUTH_GOOGLE_SECRET=...
+ALLOWED_EMAIL_DOMAINS=skyland.vc
+ALLOWED_EMAILS=
+```
+
+Google OAuth redirect URI:
+
+```text
+https://token-meterz.vercel.app/api/auth/callback/google
+```
+
+For local Next.js development:
+
+```bash
+npm install
+npm run dev
+```
 
 ## What It Reads
 
