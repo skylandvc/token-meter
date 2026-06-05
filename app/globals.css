@@ -78,7 +78,9 @@ h2 {
 }
 
 .account {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-items: end;
   gap: 8px;
   color: var(--muted);
@@ -277,7 +279,7 @@ h2 {
   }
 
   .account {
-    justify-items: start;
+    align-items: start;
   }
 
   .section-head {

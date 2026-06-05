@@ -4,6 +4,59 @@ Local browser dashboard for Codex and Claude Code token usage.
 
 ## Run
 
+## Setup For Employees
+
+Use the Vercel app here:
+
+https://token-meterz.vercel.app
+
+To show each user's own local Codex / Claude Code usage in the Vercel app, start the local bridge on that user's computer first.
+
+### Mac
+
+1. Install Python 3 if needed:
+   https://www.python.org/downloads/macos/
+
+2. Clone this repository:
+
+```bash
+git clone https://github.com/skylandvc/token-meter.git
+cd token-meter
+```
+
+3. Start the local bridge:
+
+```bash
+PORT=8766 python3 server.py
+```
+
+You can also double-click `start.command` from Finder.
+
+4. Open the Vercel app and click `ローカル版から取得`.
+
+### Windows
+
+1. Install Python 3 if needed:
+   https://www.python.org/downloads/windows/
+
+2. Clone this repository:
+
+```powershell
+git clone https://github.com/skylandvc/token-meter.git
+cd token-meter
+```
+
+3. Start the local bridge:
+
+```powershell
+$env:PORT=8766
+python server.py
+```
+
+You can also double-click `start-windows.bat` from Explorer.
+
+4. Open the Vercel app and click `ローカル版から取得`.
+
 ### Local log dashboard
 
 ```bash

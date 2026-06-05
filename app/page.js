@@ -84,6 +84,14 @@ function Dashboard({ session, isPublic }) {
         </div>
         <div className="account">
           <span>{isPublic ? "ログインなしで閲覧中" : session.user.email}</span>
+          <a
+            className="button button--light"
+            href="https://github.com/skylandvc/token-meter#setup-for-employees"
+            rel="noreferrer"
+            target="_blank"
+          >
+            セットアップ手順
+          </a>
           {!isPublic && (
             <form action={logout}>
               <button className="button button--light" type="submit">
