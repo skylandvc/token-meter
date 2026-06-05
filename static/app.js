@@ -321,24 +321,6 @@
       .join("");
   }
 
-  function renderRecent(data) {
-    const recent = data.recent || [];
-    $("eventCount").textContent = `${recent.length} events`;
-    $("recentEvents").innerHTML = recent
-      .map((event) => {
-        const cached = event.cached ? ` / cache ${formatTokens(event.cached)}` : "";
-        return `<div class="event-row">
-          <div>
-            <strong>${event.source}</strong>
-            <span>${formatDateTime(event.timestamp)} / ${event.model || event.fileName}</span>
-          </div>
-          <b>${formatTokens(event.total)}</b>
-          <small>in ${formatTokens(event.input)} / out ${formatTokens(event.output)}${cached}</small>
-        </div>`;
-      })
-      .join("");
-  }
-
   async function refresh() {
     try {
       $("scanStatus").textContent = "更新中";
@@ -353,7 +335,6 @@
       renderAgentBreakdown(data);
       renderChart(data);
       renderRateLimits(data);
-      renderRecent(data);
       $("updatedAt").textContent = formatClock(data.generatedAt);
       $("scanStatus").textContent = "Live";
     } catch (error) {

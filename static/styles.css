@@ -112,9 +112,7 @@ h2 {
 .panel-head span,
 .source-row span,
 .limit-row span,
-.event-row span,
-.muted,
-.event-row small {
+.muted {
   color: var(--muted);
 }
 
@@ -135,8 +133,7 @@ h2 {
 .metric-card__head,
 .panel-head,
 .source-row,
-.limit-row,
-.event-row {
+.limit-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -485,6 +482,10 @@ h2 {
   grid-template-columns: 0.8fr 1.2fr;
 }
 
+.split--single {
+  grid-template-columns: 1fr;
+}
+
 .panel {
   padding: 18px;
   min-height: 280px;
@@ -495,15 +496,13 @@ h2 {
 }
 
 .source-list,
-.limit-list,
-.event-list {
+.limit-list {
   display: grid;
   gap: 12px;
 }
 
 .source-row,
-.limit-row,
-.event-row {
+.limit-row {
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -511,8 +510,7 @@ h2 {
 }
 
 .source-row > div,
-.limit-row > div,
-.event-row > div {
+.limit-row > div {
   display: grid;
   gap: 4px;
 }
@@ -577,16 +575,6 @@ h2 {
   grid-column: 1 / -1;
 }
 
-.event-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: start;
-}
-
-.event-row small {
-  grid-column: 1 / -1;
-}
-
 @media (max-width: 880px) {
   .topbar,
   .capacity-grid,
@@ -640,8 +628,7 @@ h2 {
     grid-template-columns: 1fr;
   }
 
-  .pricing-row,
-  .event-row {
+  .pricing-row {
     align-items: start;
     grid-template-columns: 1fr;
   }
