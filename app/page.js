@@ -17,6 +17,10 @@ const CONTRACTS = [
   },
 ];
 
+function isPublicAccessEnabled() {
+  return String(process.env.PUBLIC_ACCESS || "").toLowerCase() === "true";
+}
+
 async function loginWithGoogle() {
   "use server";
   await signIn("google", { redirectTo: "/" });
@@ -64,27 +68,23 @@ function ContractPanel({ contract }) {
   );
 }
 
-export default async function Page() {
-  const session = await auth();
-
-  if (!session?.user) {
-    return <LoginPage />;
-  }
-
+function Dashboard({ session, isPublic }) {
   return (
     <main className="shell">
       <header className="topbar">
         <div>
-          <p className="eyebrow">Authenticated dashboard</p>
+          <p className="eyebrow">{isPublic ? "Public dashboard" : "Authenticated dashboard"}</p>
           <h1>Token Meter</h1>
         </div>
         <div className="account">
-          <span>{session.user.email}</span>
-          <form action={logout}>
-            <button className="button button--light" type="submit">
-              ログアウト
-            </button>
-          </form>
+          <span>{isPublic ? "ログインなしで閲覧中" : session.user.email}</span>
+          {!isPublic && (
+            <form action={logout}>
+              <button className="button button--light" type="submit">
+                ログアウト
+              </button>
+            </form>
+          )}
         </div>
       </header>
 
@@ -101,7 +101,7 @@ export default async function Page() {
         </article>
         <article className="metric-card">
           <span>Access</span>
-          <strong>Google</strong>
+          <strong>{isPublic ? "Public" : "Google"}</strong>
         </article>
         <article className="metric-card">
           <span>Sync</span>
@@ -112,11 +112,22 @@ export default async function Page() {
       <section className="panel" style={{ marginTop: 18 }}>
         <h2>公開版の方針</h2>
         <p className="muted">
-          Vercel版はGoogleログインで保護します。ローカルのCodex / Claude Codeログは
+          Vercel版は環境変数で公開/Googleログインを切り替えられます。ローカルのCodex / Claude Codeログは
           ブラウザから直接読めないため、次の段階でローカル集計結果をNotion DBへ同期し、
           この画面からNotion DBの最新スナップショットを表示します。
         </p>
       </section>
     </main>
   );
+}
+
+export default async function Page() {
+  const isPublic = isPublicAccessEnabled();
+  const session = isPublic ? null : await auth();
+
+  if (!isPublic && !session?.user) {
+    return <LoginPage />;
+  }
+
+  return <Dashboard session={session} isPublic={isPublic} />;
 }

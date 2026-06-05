@@ -33,7 +33,10 @@ AUTH_GOOGLE_ID=...
 AUTH_GOOGLE_SECRET=...
 ALLOWED_EMAIL_DOMAINS=skyland.vc
 ALLOWED_EMAILS=
+PUBLIC_ACCESS=false
 ```
+
+Set `PUBLIC_ACCESS=true` to allow access without login. Leave it unset or set it to `false` to require Google login.
 
 Google OAuth redirect URI:
 
