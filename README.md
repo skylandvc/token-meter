@@ -52,6 +52,17 @@ npm install
 npm run dev
 ```
 
+### Vercel app with each user's local data
+
+Each employee can show their own local token data in the Vercel app by running the local bridge first:
+
+```bash
+cd "/Users/yosihikokinoshita/Documents/New project/token-meter"
+PORT=8766 python3 server.py
+```
+
+Then open the Vercel app and click `ローカル版から取得`. The browser reads `http://127.0.0.1:8766/api/usage` from that employee's own machine.
+
 ## What It Reads
 
 - Codex: `~/.codex/sessions/**/*.jsonl` and `~/.codex/archived_sessions/**/*.jsonl`

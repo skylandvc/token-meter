@@ -1,4 +1,5 @@
 import { auth, signIn, signOut } from "../auth";
+import LocalUsagePanel from "./local-usage-panel";
 
 const CONTRACTS = [
   {
@@ -98,6 +99,8 @@ function Dashboard({ session, isPublic }) {
           <ContractPanel key={contract.service} contract={contract} />
         ))}
       </section>
+
+      <LocalUsagePanel />
 
       <section className="metric-grid" aria-label="公開版データ">
         <article className="metric-card">
