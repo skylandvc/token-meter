@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Token Meter</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Local usage monitor</p>
+          <h1>Token Meter</h1>
+        </div>
+        <div class="status">
+          <span id="scanStatus">読み込み中</span>
+          <strong id="updatedAt">--:--</strong>
+        </div>
+      </header>
+
+      <section class="capacity-grid" aria-label="現在のトークンキャパ">
+        <article class="capacity-card capacity-card--claude">
+          <div class="capacity-card__head">
+            <div>
+              <p class="eyebrow">Claude Code</p>
+              <h2>Claude Code Capacity</h2>
+            </div>
+            <span id="claudeCapacityPlan">--</span>
+          </div>
+          <div class="capacity-list" id="claudeCapacity"></div>
+        </article>
+
+        <article class="capacity-card capacity-card--codex">
+          <div class="capacity-card__head">
+            <div>
+              <p class="eyebrow">Codex</p>
+              <h2>Codex Capacity</h2>
+            </div>
+            <span id="codexCapacityPlan">--</span>
+          </div>
+          <div class="capacity-list" id="codexCapacity"></div>
+        </article>
+      </section>
+
+      <section class="pricing-grid" aria-label="料金プラン">
+        <article class="pricing-panel pricing-panel--claude">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Claude Code</p>
+              <h2>My Plan & Price</h2>
+            </div>
+            <span id="claudePricingUpdated">--</span>
+          </div>
+          <div class="pricing-list" id="claudePricing"></div>
+        </article>
+
+        <article class="pricing-panel pricing-panel--codex">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Codex</p>
+              <h2>My Plan & Price</h2>
+            </div>
+            <span id="codexPricingUpdated">--</span>
+          </div>
+          <div class="pricing-list" id="codexPricing"></div>
+        </article>
+      </section>
+
+      <section class="hero-panel" aria-label="現在の利用状況">
+        <div class="hero-copy">
+          <p>今日の消費量</p>
+          <strong id="todayTotal">0</strong>
+          <span id="todaySub">Codex / Claude Code を集計中</span>
+        </div>
+        <div class="today-split" aria-label="今日の内訳">
+          <div class="today-source today-source--claude">
+            <span>Claude Code</span>
+            <strong id="todayClaudeTotal">0</strong>
+            <small id="todayClaudeEvents">0 events</small>
+          </div>
+          <div class="today-source today-source--codex">
+            <span>Codex</span>
+            <strong id="todayCodexTotal">0</strong>
+            <small id="todayCodexEvents">0 events</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="metric-grid" aria-label="期間別トークン消費">
+        <article class="metric-card">
+          <div class="metric-card__head">
+            <span>日次</span>
+            <b id="todayPercent">今日</b>
+          </div>
+          <strong id="metricToday">0</strong>
+          <div class="bar"><span id="barToday"></span></div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-card__head">
+            <span>週次</span>
+            <b id="weekPercent">今週</b>
+          </div>
+          <strong id="metricWeek">0</strong>
+          <div class="bar"><span id="barWeek"></span></div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-card__head">
+            <span>月次</span>
+            <b id="monthPercent">今月</b>
+          </div>
+          <strong id="metricMonth">0</strong>
+          <div class="bar"><span id="barMonth"></span></div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-card__head">
+            <span>平均日次</span>
+            <b id="activeDays">0日</b>
+          </div>
+          <strong id="metricAverage">0</strong>
+          <div class="bar bar--calm"><span id="barAverage"></span></div>
+        </article>
+      </section>
+
+      <section class="agent-grid" aria-label="Codex と Claude Code の個別消費量">
+        <article class="agent-panel agent-panel--claude">
+          <div class="agent-head">
+            <div>
+              <p class="eyebrow">Claude Code</p>
+              <h2>Claude Code Usage</h2>
+            </div>
+            <span id="claudeEvents">0 events</span>
+          </div>
+          <div class="agent-metrics" id="claudeMetrics"></div>
+        </article>
+
+        <article class="agent-panel agent-panel--codex">
+          <div class="agent-head">
+            <div>
+              <p class="eyebrow">Codex</p>
+              <h2>Codex Usage</h2>
+            </div>
+            <span id="codexEvents">0 events</span>
+          </div>
+          <div class="agent-metrics" id="codexMetrics"></div>
+        </article>
+      </section>
+
+      <section class="split">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Source</h2>
+            <span id="fileCount">-- files</span>
+          </div>
+          <div class="source-list" id="sourceList"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Last 30 Days</h2>
+            <span>JST</span>
+          </div>
+          <div class="chart" id="dailyChart"></div>
+        </article>
+      </section>
+
+      <section class="split split--wide">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Codex Limit</h2>
+            <span id="planType">--</span>
+          </div>
+          <div class="limit-list" id="rateLimits"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Recent Events</h2>
+            <span id="eventCount">0 events</span>
+          </div>
+          <div class="event-list" id="recentEvents"></div>
+        </article>
+      </section>
+    </main>
+    <script src="/app.js?v=20260605-codex-plus"></script>
+  </body>
+</html>

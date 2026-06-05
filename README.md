@@ -1,0 +1,47 @@
+# Token Meter
+
+Local browser dashboard for Codex and Claude Code token usage.
+
+## Run
+
+```bash
+cd "/Users/yosihikokinoshita/Documents/New project/token-meter"
+python3 server.py
+```
+
+Open http://127.0.0.1:8765.
+
+To use a different local port:
+
+```bash
+PORT=8766 python3 server.py
+```
+
+The app is local-first and works without an internet connection after it is installed. Your current contract metadata is bundled in `static/app.js`, so plan names and prices remain visible offline. Update `CONTRACTS` in that file when your subscription changes.
+
+## What It Reads
+
+- Codex: `~/.codex/sessions/**/*.jsonl` and `~/.codex/archived_sessions/**/*.jsonl`
+- Claude Code: `~/.claude/projects/**/*.jsonl`
+
+The API scans local JSONL logs and returns day, week, month, average daily usage, source breakdowns, recent events, and the latest Codex rate-limit gauge when available.
+
+## Limits
+
+Gauge targets are local display thresholds, not billing-plan truths. Override them with environment variables:
+
+```bash
+TOKEN_METER_DAILY_LIMIT=1000000 TOKEN_METER_WEEKLY_LIMIT=7000000 TOKEN_METER_MONTHLY_LIMIT=30000000 python3 server.py
+```
+
+Codex capacity uses the latest `rate_limits` values in Codex JSONL logs. Claude Code does not expose the same official local capacity record in the logs found so far, so the dashboard shows recent local usage unless you provide display limits:
+
+```bash
+TOKEN_METER_CLAUDE_SESSION_LIMIT=50000000 TOKEN_METER_CLAUDE_WEEKLY_LIMIT=300000000 python3 server.py
+```
+
+## Public Release Notes
+
+Before publishing, move log collection behind a small explicit importer or desktop agent. The current app is intentionally local-first because it reads private home-directory logs.
+
+Do not send raw JSONL logs to a public server. For a hosted version, keep parsing on the user's machine and upload only explicit, anonymized aggregates.

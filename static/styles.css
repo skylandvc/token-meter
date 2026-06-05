@@ -1,0 +1,661 @@
+:root {
+  --bg: #f4f6f8;
+  --panel: #ffffff;
+  --ink: #111827;
+  --muted: #667085;
+  --line: #dde3ea;
+  --blue: #2f6fec;
+  --green: #23a36b;
+  --amber: #f0a429;
+  --red: #dc4c3e;
+  --shadow: 0 18px 50px rgba(17, 24, 39, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 340px;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background:
+    linear-gradient(180deg, rgba(47, 111, 236, 0.08), transparent 380px),
+    var(--bg);
+  letter-spacing: 0;
+}
+
+.shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 48px;
+}
+
+.topbar,
+.capacity-card,
+.pricing-panel,
+.hero-panel,
+.metric-card,
+.agent-panel,
+.panel {
+  border: 1px solid rgba(221, 227, 234, 0.9);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.topbar {
+  min-height: 84px;
+  padding: 18px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  border-radius: 8px;
+}
+
+.eyebrow,
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--blue);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin-top: 4px;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  line-height: 1;
+}
+
+h2 {
+  font-size: 1rem;
+}
+
+.status {
+  min-width: 156px;
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.status strong {
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.hero-panel {
+  margin-top: 18px;
+  padding: clamp(24px, 5vw, 48px);
+  display: grid;
+  grid-template-columns: minmax(220px, 0.62fr) minmax(280px, 1fr);
+  align-items: end;
+  gap: 28px;
+  border-radius: 8px;
+}
+
+.hero-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.hero-copy p,
+.hero-copy span,
+.panel-head span,
+.source-row span,
+.limit-row span,
+.event-row span,
+.muted,
+.event-row small {
+  color: var(--muted);
+}
+
+.hero-copy strong {
+  font-size: clamp(3.2rem, 8vw, 6.8rem);
+  line-height: 0.95;
+}
+
+.bar {
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5e7eb;
+}
+
+.capacity-card__head,
+.agent-head,
+.agent-metric__top,
+.metric-card__head,
+.panel-head,
+.source-row,
+.limit-row,
+.event-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.today-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.today-source {
+  min-height: 132px;
+  padding: 18px;
+  display: grid;
+  align-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+}
+
+.today-source--claude {
+  border-top: 5px solid var(--amber);
+}
+
+.today-source--codex {
+  border-top: 5px solid var(--blue);
+}
+
+.today-source span,
+.today-source small {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.today-source strong {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+}
+
+.capacity-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.pricing-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.pricing-panel {
+  padding: 18px;
+  border-radius: 8px;
+}
+
+.pricing-panel--claude {
+  border-left: 5px solid var(--amber);
+}
+
+.pricing-panel--codex {
+  border-left: 5px solid var(--blue);
+}
+
+.pricing-list {
+  display: grid;
+  gap: 10px;
+}
+
+.pricing-row {
+  padding: 13px 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+}
+
+.pricing-row > div {
+  display: grid;
+  gap: 4px;
+}
+
+.pricing-row span,
+.pricing-row small,
+.pricing-row em,
+.pricing-note {
+  color: var(--muted);
+}
+
+.pricing-row em {
+  font-style: normal;
+  font-weight: 800;
+}
+
+.pricing-row--current {
+  min-height: 112px;
+}
+
+.pricing-row--current strong {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1;
+}
+
+.pricing-row b {
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.pricing-row--current b {
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+}
+
+.pricing-note {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.capacity-card {
+  padding: clamp(18px, 3vw, 28px);
+  border-radius: 8px;
+  display: grid;
+  gap: 22px;
+}
+
+.capacity-card--codex {
+  border-top: 5px solid var(--blue);
+}
+
+.capacity-card--claude {
+  border-top: 5px solid var(--amber);
+}
+
+.capacity-card__head {
+  align-items: start;
+}
+
+.capacity-card__head h2 {
+  margin-top: 4px;
+  font-size: clamp(1.45rem, 2.7vw, 2.25rem);
+}
+
+.capacity-card__head > span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.capacity-list {
+  display: grid;
+  gap: 24px;
+}
+
+.capacity-window {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.54fr) minmax(220px, 1fr) minmax(96px, auto);
+  gap: 18px;
+  align-items: center;
+}
+
+.capacity-window__text {
+  display: grid;
+  gap: 8px;
+}
+
+.capacity-window__text strong {
+  font-size: 1.05rem;
+}
+
+.capacity-window__text span {
+  color: var(--muted);
+}
+
+.capacity-window > b {
+  order: 3;
+  font-size: 1.05rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.capacity-gauge {
+  order: 2;
+  height: 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5e7eb;
+}
+
+.capacity-gauge span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.35s ease;
+}
+
+.capacity-gauge--codex span {
+  background: var(--blue);
+}
+
+.capacity-gauge--claude span {
+  background: var(--amber);
+}
+
+.capacity-window--unknown .capacity-gauge span {
+  width: 0 !important;
+}
+
+.metric-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.metric-card,
+.panel {
+  border-radius: 8px;
+}
+
+.metric-card {
+  min-height: 158px;
+  padding: 18px;
+  display: grid;
+  align-content: space-between;
+  gap: 18px;
+}
+
+.metric-card__head {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.metric-card__head b {
+  color: var(--blue);
+  white-space: nowrap;
+}
+
+.metric-card > strong {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1;
+}
+
+.bar {
+  height: 8px;
+}
+
+.bar span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--blue), var(--amber));
+  transition: width 0.35s ease;
+}
+
+.bar--calm span {
+  background: linear-gradient(90deg, var(--green), var(--blue));
+}
+
+.bar--codex span {
+  background: linear-gradient(90deg, var(--blue), #48a6ff);
+}
+
+.bar--claude span {
+  background: linear-gradient(90deg, var(--amber), var(--green));
+}
+
+.agent-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.agent-panel {
+  padding: 20px;
+  border-radius: 8px;
+  display: grid;
+  gap: 18px;
+}
+
+.agent-panel--codex {
+  border-top: 4px solid var(--blue);
+}
+
+.agent-panel--claude {
+  border-top: 4px solid var(--amber);
+}
+
+.agent-head {
+  align-items: start;
+}
+
+.agent-head h2 {
+  margin-top: 4px;
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+}
+
+.agent-head > span {
+  color: var(--muted);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.agent-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.agent-metric {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+  display: grid;
+  gap: 12px;
+}
+
+.agent-metric__top span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.agent-metric__top b {
+  font-size: clamp(1.35rem, 2.8vw, 2.1rem);
+}
+
+.split {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 18px;
+}
+
+.split--wide {
+  grid-template-columns: 0.8fr 1.2fr;
+}
+
+.panel {
+  padding: 18px;
+  min-height: 280px;
+}
+
+.panel-head {
+  margin-bottom: 16px;
+}
+
+.source-list,
+.limit-list,
+.event-list {
+  display: grid;
+  gap: 12px;
+}
+
+.source-row,
+.limit-row,
+.event-row {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+}
+
+.source-row > div,
+.limit-row > div,
+.event-row > div {
+  display: grid;
+  gap: 4px;
+}
+
+.source-row dl {
+  margin: 0;
+  min-width: 190px;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 4px 12px;
+  font-size: 0.82rem;
+}
+
+.source-row dt {
+  color: var(--muted);
+}
+
+.source-row dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 800;
+}
+
+.chart {
+  height: 220px;
+  display: grid;
+  grid-template-columns: repeat(30, minmax(6px, 1fr));
+  align-items: end;
+  gap: 6px;
+}
+
+.day {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: end;
+  gap: 8px;
+}
+
+.day span {
+  width: 100%;
+  min-height: 3px;
+  display: block;
+  border-radius: 5px 5px 0 0;
+  background: linear-gradient(180deg, var(--blue), var(--green));
+}
+
+.day b {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  writing-mode: vertical-rl;
+  justify-self: center;
+}
+
+.limit-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+
+.limit-row .bar {
+  grid-column: 1 / -1;
+}
+
+.event-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+}
+
+.event-row small {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 880px) {
+  .topbar,
+  .capacity-grid,
+  .pricing-grid,
+  .hero-panel,
+  .today-split,
+  .agent-grid,
+  .split,
+  .split--wide {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: start;
+  }
+
+  .status {
+    justify-items: start;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .shell {
+    width: min(100% - 20px, 1180px);
+    padding-top: 10px;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .capacity-window {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .capacity-window > b {
+    order: 2;
+    text-align: left;
+  }
+
+  .capacity-gauge {
+    order: 3;
+  }
+
+  .agent-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-row,
+  .event-row {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .source-row {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .source-row dl {
+    width: 100%;
+  }
+
+  .chart {
+    gap: 3px;
+  }
+}
