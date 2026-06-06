@@ -12,6 +12,7 @@ const LOCAL_HEALTH_URLS = [
 ];
 const DEFAULT_LOCAL_USAGE_URL = LOCAL_USAGE_URLS[0];
 const CACHE_KEY = "token-meter-local-usage";
+const SHARE_URL = "https://token-meterz.vercel.app/?guest=1";
 
 function formatTokens(value) {
   const num = Number(value) || 0;
@@ -66,6 +67,206 @@ function formatCapacityLabel(item) {
     return `${formatTokens(item.usedTokens || 0)} / ${formatTokens(item.limitTokens)}`;
   }
   return item.usedTokens ? `${formatTokens(item.usedTokens)} 使用` : "上限未設定";
+}
+
+function formatShareDate(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function drawRoundRect(ctx, x, y, width, height, radius, fill, stroke = "#dde3ea", lineWidth = 1) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + width, y, x + width, y + height, r);
+  ctx.arcTo(x + width, y + height, x, y + height, r);
+  ctx.arcTo(x, y + height, x, y, r);
+  ctx.arcTo(x, y, x + width, y, r);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  if (stroke) {
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+  }
+}
+
+function drawText(ctx, text, x, y, options = {}) {
+  const {
+    size = 24,
+    weight = 600,
+    color = "#111827",
+    align = "left",
+    baseline = "top",
+  } = options;
+  ctx.font = `${weight} ${size}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = baseline;
+  ctx.fillText(text, x, y);
+}
+
+function drawGauge(ctx, x, y, width, value, scale, color, accent) {
+  drawRoundRect(ctx, x, y, width, 10, 5, "#e5e7eb", null);
+  const filled = Math.max(4, Math.min(width, Math.round(width * (scale ? value / scale : 0))));
+  drawRoundRect(ctx, x, y, filled, 10, 5, color, null);
+  if (accent && filled > 32) {
+    drawRoundRect(ctx, x + filled - 32, y, 32, 10, 5, accent, null);
+  }
+}
+
+function drawMetricCard(ctx, x, y, width, label, value, note, ratio, color, accent) {
+  drawRoundRect(ctx, x, y, width, 122, 8, "#ffffff");
+  drawText(ctx, label, x + 22, y + 20, { size: 20, color: "#667085" });
+  drawText(ctx, note, x + width - 22, y + 20, { size: 18, color: "#2f6fec", align: "right" });
+  drawText(ctx, formatTokens(value), x + 22, y + 52, { size: 46, weight: 800 });
+  drawGauge(ctx, x + 22, y + 98, width - 44, ratio, 100, color, accent);
+}
+
+function drawCapacityCard(ctx, x, y, width, title, label, plan, windows, tone) {
+  const color = tone === "claude" ? "#f0a429" : "#2f6fec";
+  drawRoundRect(ctx, x, y, width, 214, 8, "#ffffff");
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, width, 5);
+  drawText(ctx, label.toUpperCase(), x + 28, y + 34, { size: 16, weight: 800, color: "#2f6fec" });
+  drawText(ctx, plan || "--", x + width - 28, y + 34, { size: 18, color: "#667085", align: "right" });
+  drawText(ctx, title, x + 28, y + 60, { size: 36, weight: 800 });
+
+  (windows || []).slice(0, 2).forEach((item, index) => {
+    const top = y + 112 + index * 62;
+    const hasPercent = typeof item.usedPercent === "number";
+    drawText(ctx, item.label, x + 28, top, { size: 18, weight: 800 });
+    drawText(ctx, formatResetDetail(item), x + 28, top + 24, { size: 16, color: "#667085" });
+    drawGauge(ctx, x + 230, top + 12, 220, hasPercent ? item.usedPercent : 0, 100, color, tone === "claude" ? "#23a36b" : null);
+    drawText(ctx, formatCapacityLabel(item), x + width - 28, top + 6, { size: 18, weight: 800, align: "right" });
+  });
+}
+
+function drawAgentPanel(ctx, x, y, width, title, label, source, tone, activeDays) {
+  const color = tone === "claude" ? "#f0a429" : "#2f6fec";
+  const usage = usageWithAverage(source || {}, activeDays);
+  const scale = Math.max(
+    usage.today.total || 0,
+    usage.week.total || 0,
+    usage.month.total || 0,
+    usage.averageDay.total || 0,
+    1
+  );
+  drawRoundRect(ctx, x, y, width, 208, 8, "#ffffff");
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, width, 5);
+  drawText(ctx, label.toUpperCase(), x + 22, y + 24, { size: 16, weight: 800, color: "#2f6fec" });
+  drawText(ctx, `${usage.all.events || 0} events`, x + width - 22, y + 24, { size: 18, color: "#667085", align: "right" });
+  drawText(ctx, title, x + 22, y + 48, { size: 34, weight: 800 });
+
+  const metrics = [
+    ["日次", usage.today.total, color],
+    ["週次", usage.week.total, color],
+    ["月次", usage.month.total, color],
+    ["平均日次", usage.averageDay.total, "#0891b2"],
+  ];
+  metrics.forEach(([metric, value, metricColor], index) => {
+    const col = index % 2;
+    const row = Math.floor(index / 2);
+    const cardX = x + 22 + col * ((width - 58) / 2 + 14);
+    const cardY = y + 92 + row * 58;
+    const cardW = (width - 58) / 2;
+    drawRoundRect(ctx, cardX, cardY, cardW, 48, 6, "#fbfdff");
+    drawText(ctx, metric, cardX + 14, cardY + 14, { size: 14, color: "#667085" });
+    drawText(ctx, formatTokens(value), cardX + cardW - 14, cardY + 10, { size: 28, weight: 800, align: "right" });
+    drawGauge(ctx, cardX + 14, cardY + 36, cardW - 28, value, scale, metricColor, tone === "claude" ? "#23a36b" : null);
+  });
+}
+
+function createShareImage(usage) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1200;
+  canvas.height = 1320;
+  const ctx = canvas.getContext("2d");
+  const totals = usage.totals || {};
+  const today = totals.today || {};
+  const week = totals.week || {};
+  const month = totals.month || {};
+  const avg = totals.averageDay || {};
+  const sources = usage.sources || {};
+  const claudeToday = sources.claude?.today || {};
+  const codexToday = sources.codex?.today || {};
+  const scale = Math.max(today.total || 0, week.total || 0, month.total || 0, avg.total || 0, 1);
+  const activeDays = usage.periods?.activeDays || 1;
+
+  ctx.fillStyle = "#eef3f8";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  drawRoundRect(ctx, 24, 24, 1152, 92, 8, "#ffffff");
+  drawText(ctx, "PUBLIC DASHBOARD", 48, 44, { size: 14, weight: 800, color: "#2f6fec" });
+  drawText(ctx, "Token Meter", 48, 64, { size: 42, weight: 800 });
+  drawText(ctx, "このPCのローカルログだけを集計", 1148, 68, { size: 20, color: "#667085", align: "right" });
+
+  drawRoundRect(ctx, 24, 140, 1152, 54, 6, "#ffffff");
+  drawText(ctx, `ローカル使用量を表示中 / 更新 ${formatClock(usage.generatedAt)} / ${SHARE_URL}`, 48, 160, {
+    size: 17,
+    color: "#667085",
+  });
+
+  drawCapacityCard(ctx, 24, 218, 564, "Claude Code Capacity", "Claude Code", usage.capacity?.claude?.planType, usage.capacity?.claude?.windows, "claude");
+  drawCapacityCard(ctx, 612, 218, 564, "Codex Capacity", "Codex", usage.capacity?.codex?.planType, usage.capacity?.codex?.windows, "codex");
+
+  drawRoundRect(ctx, 24, 456, 1152, 260, 8, "#ffffff");
+  drawText(ctx, "今日の消費量", 72, 508, { size: 20, color: "#667085" });
+  drawText(ctx, formatTokens(today.total), 72, 548, { size: 86, weight: 800 });
+  drawText(ctx, `Codex + Claude Code / ${today.events || 0} events`, 72, 646, { size: 18, color: "#667085" });
+  drawText(ctx, "この画面を開いているPCのローカルログだけを集計しています。", 72, 676, {
+    size: 17,
+    color: "#667085",
+  });
+
+  drawRoundRect(ctx, 484, 568, 304, 112, 6, "#fbfdff");
+  ctx.fillStyle = "#f0a429";
+  ctx.fillRect(484, 568, 304, 4);
+  drawText(ctx, "Claude Code", 508, 590, { size: 17, weight: 800 });
+  drawText(ctx, formatTokens(claudeToday.total), 508, 620, { size: 46, weight: 800 });
+  drawText(ctx, `このPC / ${claudeToday.events || 0} events`, 508, 664, { size: 15 });
+
+  drawRoundRect(ctx, 808, 568, 304, 112, 6, "#fbfdff");
+  ctx.fillStyle = "#2f6fec";
+  ctx.fillRect(808, 568, 304, 4);
+  drawText(ctx, "Codex", 832, 590, { size: 17, weight: 800 });
+  drawText(ctx, formatTokens(codexToday.total), 832, 620, { size: 46, weight: 800 });
+  drawText(ctx, `このPC / ${codexToday.events || 0} events`, 832, 664, { size: 15 });
+
+  drawMetricCard(ctx, 24, 740, 270, "日次", today.total, ratioLabel(today.total, scale, "相対"), percent(today.total, scale), "#2f6fec", "#f0a429");
+  drawMetricCard(ctx, 318, 740, 270, "週次", week.total, ratioLabel(week.total, scale), percent(week.total, scale), "#2f6fec", "#f0a429");
+  drawMetricCard(ctx, 612, 740, 270, "月次", month.total, ratioLabel(month.total, scale), percent(month.total, scale), "#2f6fec", "#f0a429");
+  drawMetricCard(ctx, 906, 740, 270, "平均日次", avg.total, `${activeDays}日`, percent(avg.total, scale), "#0891b2");
+
+  drawAgentPanel(ctx, 24, 886, 564, "Claude Code Usage", "Claude Code", sources.claude, "claude", activeDays);
+  drawAgentPanel(ctx, 612, 886, 564, "Codex Usage", "Codex", sources.codex, "codex", activeDays);
+
+  drawText(ctx, "Token Meter", 48, 1248, { size: 22, weight: 800, color: "#667085" });
+  drawText(ctx, SHARE_URL, 1148, 1248, { size: 20, color: "#667085", align: "right" });
+  return canvas;
+}
+
+function downloadCanvas(canvas, fileName) {
+  const link = document.createElement("a");
+  link.download = fileName;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+
+function buildTweetText(usage) {
+  const today = usage.totals?.today || {};
+  const claude = usage.sources?.claude?.today || {};
+  const codex = usage.sources?.codex?.today || {};
+  return [
+    `Token Meter 今日の消費量: ${formatTokens(today.total)} tokens`,
+    `Claude Code ${formatTokens(claude.total)} / Codex ${formatTokens(codex.total)}`,
+    "このPCのローカルログ集計です。",
+    "#TokenMeter",
+  ].join("\\n");
 }
 
 function formatResetDetail(item) {
@@ -395,6 +596,7 @@ export default function LocalUsagePanel() {
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
   const [connectedUrl, setConnectedUrl] = useState("");
+  const [shareStatus, setShareStatus] = useState("");
 
   const updatedAt = useMemo(() => formatClock(usage?.generatedAt), [usage]);
 
@@ -434,6 +636,18 @@ export default function LocalUsagePanel() {
     }
   }
 
+  function shareToX() {
+    if (!usage) return;
+    const canvas = createShareImage(usage);
+    downloadCanvas(canvas, `token-meter-${formatShareDate()}.png`);
+    const params = new URLSearchParams({
+      text: buildTweetText(usage),
+      url: SHARE_URL,
+    });
+    window.open(`https://twitter.com/intent/tweet?${params.toString()}`, "_blank", "noopener,noreferrer");
+    setShareStatus("PNGを保存しました。Xの投稿画面で画像を添付してください。");
+  }
+
   useEffect(() => {
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
@@ -450,15 +664,23 @@ export default function LocalUsagePanel() {
     return (
       <>
         <div className="local-toolbar">
-          <span>
-            {error ||
-              `ローカル使用量を表示中 / 更新 ${updatedAt}${
-                connectedUrl ? ` / ${connectedUrl.replace("/api/usage", "")}` : ""
-              }`}
-          </span>
-          <button className="button button--light" onClick={loadLocalUsage} type="button">
-            {status === "loading" ? "読み込み中" : "再取得"}
-          </button>
+          <div className="local-toolbar__copy">
+            <span>
+              {error ||
+                `ローカル使用量を表示中 / 更新 ${updatedAt}${
+                  connectedUrl ? ` / ${connectedUrl.replace("/api/usage", "")}` : ""
+                }`}
+            </span>
+            {shareStatus && <small>{shareStatus}</small>}
+          </div>
+          <div className="local-toolbar__actions">
+            <button className="button button--light" onClick={shareToX} type="button">
+              スクショをXで投稿
+            </button>
+            <button className="button button--light" onClick={loadLocalUsage} type="button">
+              {status === "loading" ? "読み込み中" : "再取得"}
+            </button>
+          </div>
         </div>
         <FullLocalDashboard usage={usage} />
       </>

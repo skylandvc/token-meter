@@ -172,6 +172,29 @@ h2 {
   font-size: 0.86rem;
 }
 
+.local-toolbar__copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.local-toolbar__copy span,
+.local-toolbar__copy small {
+  overflow-wrap: anywhere;
+}
+
+.local-toolbar__copy small {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.local-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .metric-grid {
   margin-top: 18px;
   display: grid;
@@ -678,6 +701,15 @@ h2 {
 
   .account {
     align-items: start;
+  }
+
+  .local-toolbar {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .local-toolbar__actions {
+    justify-content: flex-start;
   }
 
   .section-head {
