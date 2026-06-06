@@ -8,7 +8,7 @@ https://token-meterz.vercel.app/
 
 トップ画面はログインなしで使える仕様です。
 
-## 社員向けセットアップ
+## セットアップ
 
 公開版だけでは、各自のPC内にある Codex / Claude Code のローカルログを直接読むことはできません。
 
@@ -195,7 +195,7 @@ PORT=8766 python3 server.py
 - 表示した集計結果だけを送信する
 - 送信前にユーザーへ確認画面を出す
 - raw JSONLログや会話本文は送信しない
-- 必要に応じてGoogleログインで社員を識別する
+- 必要に応じてGoogleログインで利用者を識別する
 - Notion DB や別DBに日次スナップショットとして保存する
 
 Googleログインを再度使う場合は、Vercel の Environment Variables に以下を設定します。
