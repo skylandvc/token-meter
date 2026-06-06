@@ -6,6 +6,10 @@ const LOCAL_USAGE_URLS = [
   "http://127.0.0.1:8766/api/usage",
   "http://127.0.0.1:8765/api/usage",
 ];
+const LOCAL_HEALTH_URLS = [
+  "http://127.0.0.1:8766/health",
+  "http://127.0.0.1:8765/health",
+];
 const DEFAULT_LOCAL_USAGE_URL = LOCAL_USAGE_URLS[0];
 const CACHE_KEY = "token-meter-local-usage";
 
@@ -474,7 +478,31 @@ export default function LocalUsagePanel() {
         既定の接続先は <code>{DEFAULT_LOCAL_USAGE_URL}</code> です。
         8766が見つからない場合は <code>{LOCAL_USAGE_URLS[1]}</code> も自動で試します。
       </p>
-      {error && <p className="error-text">{error}</p>}
+      {error && (
+        <div className="diagnostic-box">
+          <p className="error-text">{error}</p>
+          <p>
+            別PCでは、そのPC自身でローカル版 Token Meter を起動する必要があります。
+            まず同じブラウザで確認URLを開いて、<code>{"{\"ok\": true}"}</code> が出るか確認してください。
+          </p>
+          <div className="diagnostic-actions">
+            <a className="button button--light" href={LOCAL_HEALTH_URLS[0]} rel="noreferrer" target="_blank">
+              8766を確認
+            </a>
+            <a className="button button--light" href={LOCAL_HEALTH_URLS[1]} rel="noreferrer" target="_blank">
+              8765を確認
+            </a>
+            <a
+              className="button button--light"
+              href="https://github.com/skylandvc/token-meter#社員向けセットアップ"
+              rel="noreferrer"
+              target="_blank"
+            >
+              セットアップ手順
+            </a>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

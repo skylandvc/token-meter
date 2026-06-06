@@ -630,6 +630,31 @@ h2 {
   font-weight: 800;
 }
 
+.diagnostic-box {
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(220, 76, 62, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 247, 245, 0.74);
+}
+
+.diagnostic-box p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.diagnostic-box .error-text {
+  color: #b42318;
+}
+
+.diagnostic-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 @media (max-width: 880px) {
   .topbar,
   .capacity-grid,
