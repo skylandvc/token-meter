@@ -1,4 +1,3 @@
-import { auth, signIn, signOut } from "../auth";
 import LocalUsagePanel from "./local-usage-panel";
 
 const CONTRACTS = [
@@ -17,47 +16,6 @@ const CONTRACTS = [
     tone: "codex",
   },
 ];
-
-function isPublicAccessEnabled() {
-  return String(process.env.PUBLIC_ACCESS || "").toLowerCase() === "true";
-}
-
-async function loginWithGoogle() {
-  "use server";
-  await signIn("google", { redirectTo: "/" });
-}
-
-async function logout() {
-  "use server";
-  await signOut({ redirectTo: "/" });
-}
-
-function LoginPage() {
-  return (
-    <main className="login">
-      <section className="login-card">
-        <div>
-          <p className="eyebrow">Token Meter</p>
-          <h1>Googleログイン</h1>
-        </div>
-        <p>
-          社員メールだけがアクセスできます。許可するメールドメインは
-          Vercel の環境変数 <code>ALLOWED_EMAIL_DOMAINS</code> で管理します。
-        </p>
-        <div className="login-actions">
-          <form action={loginWithGoogle}>
-            <button className="button" type="submit">
-              Googleでログイン
-            </button>
-          </form>
-          <a className="button button--light" href="/?guest=1">
-            ログインせずに見る
-          </a>
-        </div>
-      </section>
-    </main>
-  );
-}
 
 function ContractPanel({ contract }) {
   return (
@@ -82,19 +40,19 @@ function ContractPanel({ contract }) {
   );
 }
 
-function Dashboard({ session, isPublic }) {
+function Dashboard() {
   return (
     <main className="shell">
       <header className="topbar">
         <div>
-          <p className="eyebrow">{isPublic ? "Public dashboard" : "Authenticated dashboard"}</p>
+          <p className="eyebrow">Public dashboard</p>
           <h1>Token Meter</h1>
         </div>
         <div className="account">
-          <span>{isPublic ? "ログインなしで閲覧中" : session.user.email}</span>
+          <span>ログインなしで利用できます</span>
           <a
             className="button button--light"
-            href="/?guest=1"
+            href="/"
           >
             トップページ
           </a>
@@ -106,13 +64,6 @@ function Dashboard({ session, isPublic }) {
           >
             セットアップ手順
           </a>
-          {!isPublic && (
-            <form action={logout}>
-              <button className="button button--light" type="submit">
-                ログアウト
-              </button>
-            </form>
-          )}
         </div>
       </header>
 
@@ -127,15 +78,6 @@ function Dashboard({ session, isPublic }) {
   );
 }
 
-export default async function Page({ searchParams }) {
-  const params = await searchParams;
-  const isPublic = isPublicAccessEnabled();
-  const isGuest = params?.guest === "1";
-  const session = isPublic || isGuest ? null : await auth();
-
-  if (!isPublic && !isGuest && !session?.user) {
-    return <LoginPage />;
-  }
-
-  return <Dashboard session={session} isPublic={isPublic || isGuest} />;
+export default function Page() {
+  return <Dashboard />;
 }
