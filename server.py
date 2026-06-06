@@ -14,6 +14,15 @@ STATIC_DIR = ROOT / "static"
 HOME = Path.home()
 JST = timezone(timedelta(hours=9))
 CACHE_TTL_SECONDS = 15
+DEFAULT_ALLOWED_ORIGINS = [
+    "https://token-meterz.vercel.app",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8765",
+    "http://127.0.0.1:8766",
+    "http://localhost:3000",
+    "http://localhost:8765",
+    "http://localhost:8766",
+]
 
 DEFAULT_LIMITS = {
     "daily": int(os.environ.get("TOKEN_METER_DAILY_LIMIT", "1000000")),
@@ -26,8 +35,33 @@ CLAUDE_WEEKLY_LIMIT = int(os.environ.get("TOKEN_METER_CLAUDE_WEEKLY_LIMIT", "0")
 CLAUDE_SESSION_WINDOW_MINUTES = int(
     os.environ.get("TOKEN_METER_CLAUDE_SESSION_WINDOW_MINUTES", "300") or "300"
 )
+CORS_ALLOWED_ORIGINS = {
+    origin.strip().rstrip("/")
+    for origin in os.environ.get(
+        "TOKEN_METER_ALLOWED_ORIGINS", ",".join(DEFAULT_ALLOWED_ORIGINS)
+    ).split(",")
+    if origin.strip()
+}
 
 cache = {"expires_at": 0.0, "payload": None}
+
+
+def request_origin(handler):
+    origin = handler.headers.get("Origin")
+    return origin.strip().rstrip("/") if origin else ""
+
+
+def is_allowed_origin(origin):
+    return not origin or origin in CORS_ALLOWED_ORIGINS
+
+
+def send_cors_headers(handler, origin):
+    if origin:
+        handler.send_header("Access-Control-Allow-Origin", origin)
+        handler.send_header("Vary", "Origin")
+    handler.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+    handler.send_header("Access-Control-Allow-Headers", "Content-Type")
+    handler.send_header("Access-Control-Allow-Private-Network", "true")
 
 
 def parse_timestamp(value, fallback=None):
@@ -422,8 +456,6 @@ def scan_usage():
                 "output": item["usage"]["output"],
                 "reasoning": item["usage"]["reasoning"],
                 "model": item["model"],
-                "sessionId": item["sessionId"],
-                "fileName": Path(item["file"]).name,
             }
             for item in latest_events[:20]
         ],
@@ -442,14 +474,13 @@ def scan_usage():
 
 def json_response(handler, payload, status=200):
     encoded = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    origin = request_origin(handler)
     handler.send_response(status)
     handler.send_header("Content-Type", "application/json; charset=utf-8")
     handler.send_header("Content-Length", str(len(encoded)))
     handler.send_header("Cache-Control", "no-store")
-    handler.send_header("Access-Control-Allow-Origin", "*")
-    handler.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
-    handler.send_header("Access-Control-Allow-Headers", "Content-Type")
-    handler.send_header("Access-Control-Allow-Private-Network", "true")
+    if is_allowed_origin(origin):
+        send_cors_headers(handler, origin)
     handler.end_headers()
     handler.wfile.write(encoded)
 
@@ -459,17 +490,23 @@ class TokenMeterHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(STATIC_DIR), **kwargs)
 
     def do_OPTIONS(self):
+        origin = request_origin(self)
+        if not is_allowed_origin(origin):
+            self.send_response(403)
+            self.end_headers()
+            return
         self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Access-Control-Allow-Private-Network", "true")
+        send_cors_headers(self, origin)
         self.send_header("Access-Control-Max-Age", "600")
         self.end_headers()
 
     def do_GET(self):
         parsed = urlparse(self.path)
         if parsed.path == "/api/usage":
+            origin = request_origin(self)
+            if not is_allowed_origin(origin):
+                json_response(self, {"error": "origin_not_allowed"}, 403)
+                return
             now = time.time()
             if cache["payload"] is None or now >= cache["expires_at"]:
                 cache["payload"] = scan_usage()

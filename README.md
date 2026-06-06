@@ -236,4 +236,20 @@ PORT=8766 python3 server.py
 
 公開版で各自の使用量を出す場合も、ブラウザが各自のPCの `127.0.0.1:8766` または `127.0.0.1:8765` を読むだけです。raw JSONLログをVercelへアップロードする設計ではありません。
 
+ローカルAPIは、標準では以下の画面からのアクセスだけを許可します。
+
+- `https://token-meterz.vercel.app`
+- `http://127.0.0.1:3000`
+- `http://127.0.0.1:8765`
+- `http://127.0.0.1:8766`
+- `http://localhost:3000`
+- `http://localhost:8765`
+- `http://localhost:8766`
+
+許可する画面を追加する場合は、ローカル版の起動時に `TOKEN_METER_ALLOWED_ORIGINS` をカンマ区切りで指定します。
+
+```bash
+TOKEN_METER_ALLOWED_ORIGINS=https://token-meterz.vercel.app,http://127.0.0.1:8766 PORT=8766 python3 server.py
+```
+
 将来的にNotion DB同期を入れる場合も、保存するのは集計済みスナップショットに限定する方針です。
