@@ -92,7 +92,7 @@ function Dashboard({ session, isPublic }) {
           </a>
           <a
             className="button button--light"
-            href="https://github.com/skylandvc/token-meter#setup-for-employees"
+            href="https://github.com/skylandvc/token-meter#社員向けセットアップ"
             rel="noreferrer"
             target="_blank"
           >

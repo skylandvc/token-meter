@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const LOCAL_USAGE_URL = "http://127.0.0.1:8766/api/usage";
+const CACHE_KEY = "token-meter-local-usage";
 
 function formatTokens(value) {
   const num = Number(value) || 0;
@@ -63,14 +64,29 @@ export default function LocalUsagePanel() {
       }
       const data = await response.json();
       setUsage(data);
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       setStatus("ready");
     } catch (caught) {
       setStatus("error");
       setError(
-        "ローカル版が起動していないか、ブラウザから127.0.0.1:8766へ接続できません。"
+        usage
+          ? "ローカル版に接続できないため、最後に取得した使用量を表示しています。"
+          : "ローカル版の自動起動が未設定か、ブラウザから127.0.0.1:8766へ接続できません。"
       );
     }
   }
+
+  useEffect(() => {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        setUsage(JSON.parse(cached));
+      } catch {
+        localStorage.removeItem(CACHE_KEY);
+      }
+    }
+    loadLocalUsage();
+  }, []);
 
   return (
     <section className="panel local-panel">
@@ -86,7 +102,7 @@ export default function LocalUsagePanel() {
 
       {!usage && (
         <p className="muted">
-          各自のPCでローカル版 Token Meter を起動してから取得します。
+          各自のPCでローカル版 Token Meter を自動起動に設定しておくと、ここに使用量が出ます。
           既定の接続先は <code>{LOCAL_USAGE_URL}</code> です。
         </p>
       )}
