@@ -133,17 +133,20 @@ function TodayPanel({ usage }) {
         <span>今日の消費量</span>
         <strong>{formatTokens(today.total)}</strong>
         <p>Codex + Claude Code / {today.events || 0} events</p>
+        <p className="scope-note">
+          この画面を開いているPCのローカルログだけを集計しています。別PCや他メンバーの使用量は含みません。
+        </p>
       </div>
       <div className="today-split">
         <article className="today-source today-source--claude">
           <span>Claude Code</span>
           <strong>{formatTokens(claudeToday.total)}</strong>
-          <small>{claudeToday.events || 0} events</small>
+          <small>このPC / {claudeToday.events || 0} events</small>
         </article>
         <article className="today-source today-source--codex">
           <span>Codex</span>
           <strong>{formatTokens(codexToday.total)}</strong>
-          <small>{codexToday.events || 0} events</small>
+          <small>このPC / {codexToday.events || 0} events</small>
         </article>
       </div>
     </section>
