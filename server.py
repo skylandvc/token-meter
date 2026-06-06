@@ -447,6 +447,9 @@ def json_response(handler, payload, status=200):
     handler.send_header("Content-Length", str(len(encoded)))
     handler.send_header("Cache-Control", "no-store")
     handler.send_header("Access-Control-Allow-Origin", "*")
+    handler.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+    handler.send_header("Access-Control-Allow-Headers", "Content-Type")
+    handler.send_header("Access-Control-Allow-Private-Network", "true")
     handler.end_headers()
     handler.wfile.write(encoded)
 
@@ -454,6 +457,15 @@ def json_response(handler, payload, status=200):
 class TokenMeterHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(STATIC_DIR), **kwargs)
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Private-Network", "true")
+        self.send_header("Access-Control-Max-Age", "600")
+        self.end_headers()
 
     def do_GET(self):
         parsed = urlparse(self.path)
