@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-const LOCAL_USAGE_URL = "http://127.0.0.1:8766/api/usage";
+const LOCAL_USAGE_URLS = [
+  "http://127.0.0.1:8766/api/usage",
+  "http://127.0.0.1:8765/api/usage",
+];
+const DEFAULT_LOCAL_USAGE_URL = LOCAL_USAGE_URLS[0];
 const CACHE_KEY = "token-meter-local-usage";
 
 function formatTokens(value) {
@@ -383,6 +387,7 @@ export default function LocalUsagePanel() {
   const [usage, setUsage] = useState(null);
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
+  const [connectedUrl, setConnectedUrl] = useState("");
 
   const updatedAt = useMemo(() => formatClock(usage?.generatedAt), [usage]);
 
@@ -390,10 +395,26 @@ export default function LocalUsagePanel() {
     setStatus("loading");
     setError("");
     try {
-      const response = await fetch(LOCAL_USAGE_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      let data = null;
+      let activeUrl = "";
+      let lastError = null;
+
+      for (const url of LOCAL_USAGE_URLS) {
+        try {
+          const response = await fetch(url, { cache: "no-store" });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          data = await response.json();
+          activeUrl = url;
+          break;
+        } catch (caught) {
+          lastError = caught;
+        }
+      }
+
+      if (!data) throw lastError || new Error("Local Token Meter is not reachable");
+
       setUsage(data);
+      setConnectedUrl(activeUrl);
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       setStatus("ready");
     } catch {
@@ -401,7 +422,7 @@ export default function LocalUsagePanel() {
       setError(
         usage
           ? "ローカル版に接続できないため、最後に取得した使用量を表示しています。"
-          : "ローカル版の自動起動が未設定か、ブラウザから127.0.0.1:8766へ接続できません。"
+          : "ローカル版の自動起動が未設定か、ブラウザから127.0.0.1:8766 / 8765へ接続できません。"
       );
     }
   }
@@ -422,7 +443,12 @@ export default function LocalUsagePanel() {
     return (
       <>
         <div className="local-toolbar">
-          <span>{error || `ローカル使用量を表示中 / 更新 ${updatedAt}`}</span>
+          <span>
+            {error ||
+              `ローカル使用量を表示中 / 更新 ${updatedAt}${
+                connectedUrl ? ` / ${connectedUrl.replace("/api/usage", "")}` : ""
+              }`}
+          </span>
           <button className="button button--light" onClick={loadLocalUsage} type="button">
             {status === "loading" ? "読み込み中" : "再取得"}
           </button>
@@ -445,7 +471,8 @@ export default function LocalUsagePanel() {
       </div>
       <p className="muted">
         各自のPCでローカル版 Token Meter を自動起動に設定しておくと、ここに使用量が出ます。
-        既定の接続先は <code>{LOCAL_USAGE_URL}</code> です。
+        既定の接続先は <code>{DEFAULT_LOCAL_USAGE_URL}</code> です。
+        8766が見つからない場合は <code>{LOCAL_USAGE_URLS[1]}</code> も自動で試します。
       </p>
       {error && <p className="error-text">{error}</p>}
     </section>
