@@ -2,10 +2,14 @@
 set -e
 
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
+INSTALL_DIR="$HOME/.token-meter-local"
 PLIST="$HOME/Library/LaunchAgents/vc.skyland.token-meter.plist"
 LOG_DIR="$HOME/Library/Logs/token-meter"
 
-mkdir -p "$HOME/Library/LaunchAgents" "$LOG_DIR"
+mkdir -p "$HOME/Library/LaunchAgents" "$LOG_DIR" "$INSTALL_DIR"
+cp "$APP_DIR/server.py" "$INSTALL_DIR/server.py"
+rm -rf "$INSTALL_DIR/static"
+cp -R "$APP_DIR/static" "$INSTALL_DIR/static"
 
 cat > "$PLIST" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -19,7 +23,7 @@ cat > "$PLIST" <<EOF
   <array>
     <string>/bin/zsh</string>
     <string>-lc</string>
-    <string>cd "$APP_DIR" &amp;&amp; PORT=8766 python3 server.py</string>
+    <string>cd "$INSTALL_DIR" &amp;&amp; PORT=8766 python3 server.py</string>
   </array>
   <key>RunAtLoad</key>
   <true/>
