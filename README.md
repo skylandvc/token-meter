@@ -34,13 +34,25 @@ python3 --version
 
 バージョンが表示されれば、そのまま次へ進めます。
 
-Homebrew が入っている場合は、ターミナルで以下を実行します。
+`python3 --version` でバージョンが出ない場合だけ、Python 3 を入れてください。
+
+画面から入れる場合:
+
+https://www.python.org/downloads/macos/
+
+ターミナルで入れる場合は Homebrew を使います。まず Homebrew が入っているか確認します。
+
+```bash
+brew --version
+```
+
+Homebrew が入っている場合:
 
 ```bash
 brew install python
 ```
 
-Homebrew が入っていない場合は、以下で Homebrew を入れてから Python 3 を入れます。
+`zsh: command not found: brew` と出る場合は、Homebrew が入っていません。以下で Homebrew を入れてから Python 3 を入れます。
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -63,10 +75,13 @@ Finder で `install-mac-autostart.command` をダブルクリックします。
 今すぐ起動したい場合は、以下を実行します。
 
 ```bash
+cd ~/token-meter
 PORT=8766 python3 server.py
 ```
 
 Finder から `start.command` をダブルクリックして起動することもできます。
+
+`can't open file '/Users/.../server.py'` と出る場合は、`token-meter` フォルダに移動できていません。先に `cd ~/token-meter` を実行してください。
 
 4. 公開版を開く
 
