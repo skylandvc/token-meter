@@ -61,15 +61,23 @@ function LoginPage() {
 
 function ContractPanel({ contract }) {
   return (
-    <article className={`panel panel--${contract.tone}`}>
-      <div className="contract">
+    <article className={`pricing-panel pricing-panel--${contract.tone}`}>
+      <div className="pricing-panel__head">
         <div>
           <p className="eyebrow">{contract.service}</p>
+          <h2>My Plan & Price</h2>
+        </div>
+        <span>確認日 2026-06-05</span>
+      </div>
+      <div className="pricing-row pricing-row--current">
+        <div>
+          <span>{contract.service}</span>
           <strong>{contract.plan}</strong>
-          <p className="muted">次回更新日 {contract.renewal}</p>
+          <em>次回更新日 {contract.renewal}</em>
         </div>
         <b>{contract.price}</b>
       </div>
+      <p className="pricing-note">現在の契約として表示しています。</p>
     </article>
   );
 }
@@ -110,40 +118,10 @@ function Dashboard({ session, isPublic }) {
 
       <LocalUsagePanel />
 
-      <section className="metric-grid" aria-label="公開版データ">
-        <article className="metric-card">
-          <span>Data Source</span>
-          <strong>Notion</strong>
-        </article>
-        <article className="metric-card">
-          <span>Access</span>
-          <strong>{isPublic ? "Public" : "Google"}</strong>
-        </article>
-        <article className="metric-card">
-          <span>Sync</span>
-          <strong>準備中</strong>
-        </article>
-      </section>
-
-      <section className="panel" style={{ marginTop: 18 }}>
-        <h2>公開版の方針</h2>
-        <p className="muted">
-          Vercel版は環境変数で公開/Googleログインを切り替えられます。ローカルのCodex / Claude Codeログは
-          ブラウザから直接読めないため、次の段階でローカル集計結果をNotion DBへ同期し、
-          この画面からNotion DBの最新スナップショットを表示します。
-        </p>
-      </section>
-
-      <section className="panel" style={{ marginTop: 18 }}>
-        <div>
-          <p className="eyebrow">Plan & Price</p>
-          <h2>契約中プラン</h2>
-        </div>
-        <div className="grid grid--inside" aria-label="契約中プラン">
+      <section className="pricing-grid" aria-label="契約中プラン">
           {CONTRACTS.map((contract) => (
             <ContractPanel key={contract.service} contract={contract} />
           ))}
-        </div>
       </section>
     </main>
   );
