@@ -26,6 +26,27 @@ https://token-meterz.vercel.app/
 
 https://www.python.org/downloads/macos/
 
+ターミナルで確認します。
+
+```bash
+python3 --version
+```
+
+バージョンが表示されれば、そのまま次へ進めます。
+
+Homebrew が入っている場合は、ターミナルで以下を実行します。
+
+```bash
+brew install python
+```
+
+Homebrew が入っていない場合は、以下で Homebrew を入れてから Python 3 を入れます。
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install python
+```
+
 2. このリポジトリを取得する
 
 ```bash
