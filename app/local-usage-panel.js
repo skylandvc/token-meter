@@ -257,16 +257,8 @@ function downloadCanvas(canvas, fileName) {
   link.click();
 }
 
-function buildTweetText(usage) {
-  const today = usage.totals?.today || {};
-  const claude = usage.sources?.claude?.today || {};
-  const codex = usage.sources?.codex?.today || {};
-  return [
-    `Token Meter 今日の消費量: ${formatTokens(today.total)} tokens`,
-    `Claude Code ${formatTokens(claude.total)} / Codex ${formatTokens(codex.total)}`,
-    "このPCのローカルログ集計です。",
-    "#TokenMeter",
-  ].join("\\n");
+function buildTweetText() {
+  return `Token Meterを使ってみた #TokenMeter ${SHARE_URL}`;
 }
 
 function formatResetDetail(item) {
