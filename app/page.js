@@ -58,7 +58,7 @@ function Dashboard() {
           </a>
           <a
             className="button button--light"
-            href="https://github.com/skylandvc/token-meter#セットアップ"
+            href="https://github.com/skylandvc/token-meter"
             rel="noreferrer"
             target="_blank"
           >
