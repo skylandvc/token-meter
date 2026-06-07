@@ -57,12 +57,12 @@ function Dashboard() {
             トップページ
           </a>
           <a
-            className="button button--light"
+            className="text-link"
             href="https://github.com/skylandvc/token-meter"
             rel="noreferrer"
             target="_blank"
           >
-            セットアップ手順
+            README
           </a>
         </div>
       </header>

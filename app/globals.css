@@ -110,6 +110,17 @@ h2 {
   color: var(--ink);
 }
 
+.text-link {
+  color: var(--blue);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.text-link:hover {
+  color: #1d4ed8;
+}
+
 .login {
   min-height: 100vh;
   display: grid;
