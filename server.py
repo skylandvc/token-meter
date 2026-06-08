@@ -17,9 +17,11 @@ CACHE_TTL_SECONDS = 15
 DEFAULT_ALLOWED_ORIGINS = [
     "https://token-meterz.vercel.app",
     "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
     "http://127.0.0.1:8765",
     "http://127.0.0.1:8766",
     "http://localhost:3000",
+    "http://localhost:3001",
     "http://localhost:8765",
     "http://localhost:8766",
 ]
@@ -140,7 +142,110 @@ def add_usage(target, usage):
     target["events"] += 1
 
 
-def event_payload(source, timestamp, usage, file_path, model="", session_id=""):
+codex_session_cache = {}
+
+
+def display_project_name(project_path):
+    if not project_path:
+        return "Unknown project"
+    text = str(project_path).rstrip("/")
+    if not text:
+        return "Unknown project"
+    return Path(text).name or text
+
+
+def decoded_claude_project_dir(path):
+    try:
+        project_dir = path.relative_to(HOME / ".claude" / "projects").parts[0]
+    except (ValueError, IndexError):
+        return ""
+    if not project_dir.startswith("-"):
+        return project_dir
+    parts = [part for part in project_dir.split("-") if part]
+    if not parts:
+        return project_dir
+    return "/" + "/".join(parts)
+
+
+def compact_title(text, fallback):
+    cleaned = re.sub(r"\s+", " ", str(text or "")).strip()
+    if not cleaned:
+        return fallback
+    return cleaned[:56] + ("..." if len(cleaned) > 56 else "")
+
+
+def extract_message_text(content):
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for item in content:
+            if isinstance(item, dict):
+                parts.append(item.get("text") or item.get("input_text") or "")
+        return " ".join(part for part in parts if part)
+    return ""
+
+
+def codex_session_meta(path):
+    cached = codex_session_cache.get(path)
+    if cached:
+        return cached
+    project_path = ""
+    session_id = ""
+    first_user_text = ""
+    try:
+        handle = path.open("r", encoding="utf-8")
+    except OSError:
+        codex_session_cache[path] = {}
+        return codex_session_cache[path]
+    with handle:
+        for line in handle:
+            if '"cwd"' not in line and '"session_meta"' not in line and '"role":"user"' not in line and '"user_message"' not in line:
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            payload = item.get("payload") or {}
+            if item.get("type") == "session_meta" or payload.get("id"):
+                session_id = session_id or payload.get("id") or item.get("id") or ""
+            if not project_path:
+                project_path = (
+                    payload.get("cwd")
+                    or item.get("cwd")
+                    or (payload.get("turn_context") or {}).get("cwd")
+                    or ""
+                )
+            if not first_user_text:
+                message = payload.get("message") or item.get("message") or {}
+                if isinstance(message, dict) and message.get("role") == "user":
+                    first_user_text = extract_message_text(message.get("content"))
+                elif payload.get("type") == "user_message":
+                    first_user_text = payload.get("message") or ""
+            if project_path and session_id and first_user_text:
+                break
+    fallback_id = session_id or path.stem.replace("rollout-", "")[:8]
+    meta = {
+        "projectPath": project_path or "",
+        "project": display_project_name(project_path),
+        "sessionId": session_id or fallback_id,
+        "threadTitle": compact_title(first_user_text, f"Codex chat {fallback_id[:8]}"),
+    }
+    codex_session_cache[path] = meta
+    return meta
+
+
+def event_payload(
+    source,
+    timestamp,
+    usage,
+    file_path,
+    model="",
+    session_id="",
+    project_path="",
+    thread_title="",
+):
+    project = display_project_name(project_path)
     return {
         "source": source,
         "timestamp": timestamp,
@@ -148,6 +253,9 @@ def event_payload(source, timestamp, usage, file_path, model="", session_id=""):
         "file": str(file_path),
         "model": model,
         "sessionId": session_id,
+        "project": project,
+        "projectPath": str(project_path or ""),
+        "threadTitle": thread_title or "",
     }
 
 
@@ -200,11 +308,13 @@ def iter_claude_events():
                     path,
                     message.get("model", ""),
                     item.get("sessionId", ""),
+                    item.get("cwd") or decoded_claude_project_dir(path),
                 )
 
 
 def iter_codex_events():
     for path in discover_codex_files():
+        meta = codex_session_meta(path)
         try:
             handle = path.open("r", encoding="utf-8")
         except OSError:
@@ -225,7 +335,15 @@ def iter_codex_events():
                 timestamp = parse_timestamp(item.get("timestamp"))
                 if not usage or not timestamp:
                     continue
-                yield event_payload("codex", timestamp, usage, path)
+                yield event_payload(
+                    "codex",
+                    timestamp,
+                    usage,
+                    path,
+                    session_id=meta.get("sessionId", ""),
+                    project_path=meta.get("projectPath", ""),
+                    thread_title=meta.get("threadTitle", ""),
+                )
 
 
 def period_keys(now):
@@ -267,6 +385,97 @@ def source_summary(events, today, week_start, month_start):
         if day >= month_start:
             add_usage(summary[source]["month"], usage)
     return summary
+
+
+def build_project_summary(events, today, week_start, month_start):
+    projects = {}
+    for event in events:
+        key = event.get("projectPath") or event.get("project") or "Unknown project"
+        if key not in projects:
+            projects[key] = {
+                "name": event.get("project") or display_project_name(key),
+                "path": event.get("projectPath") or "",
+                "today": empty_usage(),
+                "week": empty_usage(),
+                "month": empty_usage(),
+                "all": empty_usage(),
+                "sources": {},
+                "latestAt": None,
+            }
+        project = projects[key]
+        source = event["source"]
+        day = event["timestamp"].date()
+        usage = event["usage"]
+        add_usage(project["all"], usage)
+        if day == today:
+            add_usage(project["today"], usage)
+        if day >= week_start:
+            add_usage(project["week"], usage)
+        if day >= month_start:
+            add_usage(project["month"], usage)
+        if source not in project["sources"]:
+            project["sources"][source] = empty_usage()
+        add_usage(project["sources"][source], usage)
+        latest_at = event["timestamp"]
+        if project["latestAt"] is None or latest_at > project["latestAt"]:
+            project["latestAt"] = latest_at
+
+    items = []
+    for item in projects.values():
+        items.append(
+            {
+                **item,
+                "latestAt": item["latestAt"].isoformat() if item["latestAt"] else None,
+            }
+        )
+    items.sort(key=lambda item: (item["month"]["total"], item["all"]["total"]), reverse=True)
+    max_total = max([item["month"]["total"] for item in items] + [1])
+    return {"items": items[:30], "maxMonth": max_total}
+
+
+def build_thread_summary(events, today, week_start, month_start):
+    threads = {}
+    for event in events:
+        if event.get("source") != "codex":
+            continue
+        key = event.get("sessionId") or event.get("file") or "unknown"
+        if key not in threads:
+            threads[key] = {
+                "title": event.get("threadTitle") or f"Codex chat {str(key)[:8]}",
+                "sessionId": key,
+                "project": event.get("project") or "Unknown project",
+                "projectPath": event.get("projectPath") or "",
+                "today": empty_usage(),
+                "week": empty_usage(),
+                "month": empty_usage(),
+                "all": empty_usage(),
+                "latestAt": None,
+            }
+        thread = threads[key]
+        day = event["timestamp"].date()
+        usage = event["usage"]
+        add_usage(thread["all"], usage)
+        if day == today:
+            add_usage(thread["today"], usage)
+        if day >= week_start:
+            add_usage(thread["week"], usage)
+        if day >= month_start:
+            add_usage(thread["month"], usage)
+        latest_at = event["timestamp"]
+        if thread["latestAt"] is None or latest_at > thread["latestAt"]:
+            thread["latestAt"] = latest_at
+
+    items = []
+    for item in threads.values():
+        items.append(
+            {
+                **item,
+                "latestAt": item["latestAt"].isoformat() if item["latestAt"] else None,
+            }
+        )
+    items.sort(key=lambda item: (item["month"]["total"], item["all"]["total"]), reverse=True)
+    max_total = max([item["month"]["total"] for item in items] + [1])
+    return {"items": items[:50], "maxMonth": max_total}
 
 
 def latest_rate_limit(events):
@@ -445,6 +654,8 @@ def scan_usage():
         },
         "totals": totals,
         "sources": source_summary(events, today, week_start, month_start),
+        "projects": build_project_summary(events, today, week_start, month_start),
+        "threads": build_thread_summary(events, today, week_start, month_start),
         "series": build_series(daily_totals, today),
         "recent": [
             {

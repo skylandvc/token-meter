@@ -52,9 +52,15 @@ function Dashboard() {
           <span>ログインなしで利用できます</span>
           <a
             className="button button--light"
-            href="/"
+            href="/projects"
           >
-            トップページ
+            プロジェクト別
+          </a>
+          <a
+            className="button button--light"
+            href="/threads"
+          >
+            チャット別
           </a>
           <a
             className="text-link"
