@@ -6,6 +6,7 @@ const LOCAL_USAGE_URLS = [
   "http://127.0.0.1:8766/api/usage",
   "http://127.0.0.1:8765/api/usage",
 ];
+const HOSTED_USAGE_URL = "/usage-snapshot.json";
 const CACHE_KEY = "token-meter-thread-usage";
 
 function formatTokens(value) {
@@ -199,6 +200,35 @@ export default function ThreadUsagePanel() {
     [threads]
   );
 
+  async function fetchUsageFrom(url, requiredKey) {
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const candidate = await response.json();
+    if (!candidate[requiredKey]?.items) {
+      throw new Error(`${url} does not include ${requiredKey} usage yet`);
+    }
+    return candidate;
+  }
+
+  async function loadHostedUsage() {
+    setStatus("loading");
+    setError("");
+    try {
+      const data = await fetchUsageFrom(HOSTED_USAGE_URL, "threads");
+      setUsage(data);
+      setConnectedUrl("Vercel保存版");
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      setStatus("ready");
+    } catch {
+      setStatus("error");
+      setError(
+        usage
+          ? "Vercel保存版に接続できないため、最後に取得したチャット別使用量を表示しています。"
+          : "Vercel保存版のチャット別データがまだありません。"
+      );
+    }
+  }
+
   async function loadLocalUsage() {
     setStatus("loading");
     setError("");
@@ -208,14 +238,7 @@ export default function ThreadUsagePanel() {
       let lastError = null;
       for (const url of LOCAL_USAGE_URLS) {
         try {
-          const response = await fetch(url, { cache: "no-store" });
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          const candidate = await response.json();
-          if (!candidate.threads?.items && url !== LOCAL_USAGE_URLS[LOCAL_USAGE_URLS.length - 1]) {
-            lastError = new Error("Local Token Meter does not include chat usage yet");
-            continue;
-          }
-          data = candidate;
+          data = await fetchUsageFrom(url, "threads");
           activeUrl = url;
           break;
         } catch (caught) {
@@ -229,11 +252,7 @@ export default function ThreadUsagePanel() {
       setStatus("ready");
     } catch {
       setStatus("error");
-      setError(
-        usage
-          ? "ローカル版に接続できないため、最後に取得したチャット別使用量を表示しています。"
-          : "ローカル版 Token Meter が見つかりません。127.0.0.1:8766 または 8765 の起動を確認してください。"
-      );
+      setError("ローカル版に接続できないため、Vercel保存版または最後に取得したチャット別使用量を表示しています。");
     }
   }
 
@@ -253,7 +272,7 @@ export default function ThreadUsagePanel() {
         localStorage.removeItem(CACHE_KEY);
       }
     }
-    loadLocalUsage();
+    loadHostedUsage();
   }, []);
 
   if (!usage) {
@@ -264,11 +283,11 @@ export default function ThreadUsagePanel() {
             <p className="eyebrow">Local bridge</p>
             <h2>チャット別使用量</h2>
           </div>
-          <button className="button button--light" onClick={loadLocalUsage} type="button">
-            {status === "loading" ? "読み込み中" : "ローカル版から取得"}
+          <button className="button button--light" onClick={loadHostedUsage} type="button">
+            {status === "loading" ? "読み込み中" : "Vercel保存版から取得"}
           </button>
         </div>
-        <p className="muted">{error || "ローカル版 Token Meter からCodexチャット別データを取得します。"}</p>
+        <p className="muted">{error || "Vercelに保存したCodexチャット別データを取得します。"}</p>
       </section>
     );
   }
@@ -290,7 +309,10 @@ export default function ThreadUsagePanel() {
             PNGを保存
           </button>
           <button className="button button--light" onClick={loadLocalUsage} type="button">
-            {status === "loading" ? "読み込み中" : "再取得"}
+            {status === "loading" ? "読み込み中" : "ローカル版で更新"}
+          </button>
+          <button className="button button--light" onClick={loadHostedUsage} type="button">
+            Vercel保存版
           </button>
         </div>
       </div>

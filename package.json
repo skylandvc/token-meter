@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "snapshot": "python3 scripts/export_usage_snapshot.py",
     "start": "next start"
   },
   "dependencies": {
