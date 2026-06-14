@@ -276,6 +276,77 @@ def discover_codex_files():
             yield from root.rglob("*.jsonl")
 
 
+def discover_cursor_files():
+    root = HOME / ".cursor" / "projects"
+    if root.exists():
+        yield from root.rglob("agent-transcripts/**/*.jsonl")
+
+
+def cursor_project_from_path(path):
+    try:
+        parts = path.relative_to(HOME / ".cursor" / "projects").parts
+    except ValueError:
+        return "Unknown project", ""
+    if not parts:
+        return "Unknown project", ""
+    raw = parts[0]
+    if raw == "empty-window":
+        return "empty-window", ""
+    if raw.startswith("Users-"):
+        project_path = "/" + raw.replace("-", "/")
+        return display_project_name(project_path), project_path
+    return raw, raw
+
+
+def estimate_text_tokens(text):
+    cleaned = re.sub(r"\s+", " ", str(text or "")).strip()
+    if not cleaned:
+        return 0
+    ascii_chars = sum(1 for char in cleaned if ord(char) < 128)
+    non_ascii_chars = len(cleaned) - ascii_chars
+    return max(1, round(ascii_chars / 4 + non_ascii_chars / 1.8))
+
+
+def estimate_cursor_usage(message):
+    usage = empty_usage()
+    content = (message or {}).get("content")
+    if not isinstance(content, list):
+        content = [content]
+    for item in content:
+        if isinstance(item, str):
+            usage["input"] += estimate_text_tokens(item)
+            continue
+        if not isinstance(item, dict):
+            continue
+        if item.get("type") == "text":
+            usage["input"] += estimate_text_tokens(item.get("text"))
+        elif item.get("type") == "tool_use":
+            usage["input"] += estimate_text_tokens(json.dumps(item.get("input") or {}, ensure_ascii=False))
+            usage["output"] += estimate_text_tokens(item.get("name"))
+        elif item.get("type") == "tool_result":
+            usage["output"] += estimate_text_tokens(item.get("content"))
+        else:
+            usage["input"] += estimate_text_tokens(json.dumps(item, ensure_ascii=False))
+    usage["total"] = usage["input"] + usage["output"]
+    return usage if usage["total"] > 0 else None
+
+
+def parse_cursor_timestamp(item, fallback):
+    timestamp = item.get("timestamp") or item.get("createdAt") or item.get("time")
+    if timestamp:
+        parsed = parse_timestamp(timestamp)
+        if parsed:
+            return parsed
+    message = item.get("message") or {}
+    text = extract_message_text(message.get("content"))
+    match = re.search(r"<timestamp>(.*?)</timestamp>", text, re.DOTALL)
+    if match:
+        parsed = parse_timestamp(match.group(1).strip())
+        if parsed:
+            return parsed
+    return fallback
+
+
 def iter_claude_events():
     seen_request_usage = set()
     for path in discover_claude_files():
@@ -344,6 +415,41 @@ def iter_codex_events():
                     project_path=meta.get("projectPath", ""),
                     thread_title=meta.get("threadTitle", ""),
                 )
+
+
+def iter_cursor_events():
+    for path in discover_cursor_files():
+        try:
+            fallback_time = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).astimezone(JST)
+        except OSError:
+            fallback_time = datetime.now(JST)
+        project, project_path = cursor_project_from_path(path)
+        session_id = path.stem
+        try:
+            handle = path.open("r", encoding="utf-8")
+        except OSError:
+            continue
+        with handle:
+            for line in handle:
+                if '"message"' not in line:
+                    continue
+                try:
+                    item = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                usage = estimate_cursor_usage(item.get("message") or {})
+                if not usage:
+                    continue
+                timestamp = parse_cursor_timestamp(item, fallback_time)
+                yield event_payload(
+                    "cursor",
+                    timestamp,
+                    usage,
+                    path,
+                    session_id=session_id,
+                    project_path=project_path,
+                    thread_title=f"Cursor transcript {session_id[:8]}",
+                ) | {"project": project}
 
 
 def period_keys(now):
@@ -438,11 +544,14 @@ def build_thread_summary(events, today, week_start, month_start):
     for event in events:
         if event.get("source") != "codex":
             continue
-        key = event.get("sessionId") or event.get("file") or "unknown"
+        key = event.get("file") or event.get("sessionId") or "unknown"
+        session_id = event.get("sessionId") or ""
         if key not in threads:
             threads[key] = {
-                "title": event.get("threadTitle") or f"Codex chat {str(key)[:8]}",
-                "sessionId": key,
+                "title": event.get("threadTitle")
+                or f"Codex chat {(session_id or key)[:8]}",
+                "sessionId": session_id,
+                "file": event.get("file") or "",
                 "project": event.get("project") or "Unknown project",
                 "projectPath": event.get("projectPath") or "",
                 "today": empty_usage(),
@@ -476,6 +585,81 @@ def build_thread_summary(events, today, week_start, month_start):
     items.sort(key=lambda item: (item["month"]["total"], item["all"]["total"]), reverse=True)
     max_total = max([item["month"]["total"] for item in items] + [1])
     return {"items": items[:50], "maxMonth": max_total}
+
+
+def build_cursor_summary(events, today, week_start, month_start):
+    totals = {
+        "today": empty_usage(),
+        "week": empty_usage(),
+        "month": empty_usage(),
+        "all": empty_usage(),
+    }
+    transcripts = {}
+    daily_totals = defaultdict(int)
+    first_day = None
+    for event in events:
+        usage = event["usage"]
+        day = event["timestamp"].date()
+        first_day = day if first_day is None else min(first_day, day)
+        daily_totals[day.isoformat()] += usage["total"]
+        add_usage(totals["all"], usage)
+        if day == today:
+            add_usage(totals["today"], usage)
+        if day >= week_start:
+            add_usage(totals["week"], usage)
+        if day >= month_start:
+            add_usage(totals["month"], usage)
+
+        key = event.get("file") or event.get("sessionId") or "unknown"
+        if key not in transcripts:
+            transcripts[key] = {
+                "title": event.get("threadTitle") or f"Cursor transcript {(event.get('sessionId') or key)[:8]}",
+                "sessionId": event.get("sessionId") or "",
+                "file": event.get("file") or "",
+                "project": event.get("project") or "Unknown project",
+                "projectPath": event.get("projectPath") or "",
+                "today": empty_usage(),
+                "week": empty_usage(),
+                "month": empty_usage(),
+                "all": empty_usage(),
+                "latestAt": None,
+            }
+        transcript = transcripts[key]
+        add_usage(transcript["all"], usage)
+        if day == today:
+            add_usage(transcript["today"], usage)
+        if day >= week_start:
+            add_usage(transcript["week"], usage)
+        if day >= month_start:
+            add_usage(transcript["month"], usage)
+        if transcript["latestAt"] is None or event["timestamp"] > transcript["latestAt"]:
+            transcript["latestAt"] = event["timestamp"]
+
+    active_days = max(1, (today - (first_day or today)).days + 1)
+    totals["averageDay"] = {
+        **empty_usage(),
+        "total": round(totals["all"]["total"] / active_days),
+        "events": round(totals["all"]["events"] / active_days, 2),
+    }
+    items = []
+    for item in transcripts.values():
+        items.append(
+            {
+                **item,
+                "latestAt": item["latestAt"].isoformat() if item["latestAt"] else None,
+            }
+        )
+    items.sort(key=lambda item: (item["month"]["total"], item["all"]["total"]), reverse=True)
+    return {
+        "source": "estimated_from_cursor_agent_transcripts",
+        "note": "Cursor の agent transcript から文字量ベースで推定したトークン数です。公式Usageではありません。",
+        "files": len(list(discover_cursor_files())),
+        "activeDays": active_days,
+        "totals": totals,
+        "series": build_series(daily_totals, today),
+        "items": items[:50],
+        "maxMonth": max([item["month"]["total"] for item in items] + [1]),
+    }
 
 
 def latest_rate_limit(events):
@@ -610,6 +794,7 @@ def scan_usage():
     now = datetime.now(JST)
     today, week_start, month_start = period_keys(now)
     events = list(iter_codex_events()) + list(iter_claude_events())
+    cursor_events = list(iter_cursor_events())
     daily_totals = defaultdict(int)
     totals = {
         "today": empty_usage(),
@@ -656,6 +841,7 @@ def scan_usage():
         "sources": source_summary(events, today, week_start, month_start),
         "projects": build_project_summary(events, today, week_start, month_start),
         "threads": build_thread_summary(events, today, week_start, month_start),
+        "cursor": build_cursor_summary(cursor_events, today, week_start, month_start),
         "series": build_series(daily_totals, today),
         "recent": [
             {
@@ -678,6 +864,7 @@ def scan_usage():
         "files": {
             "claude": len(list(discover_claude_files())),
             "codex": len(list(discover_codex_files())),
+            "cursor": len(list(discover_cursor_files())),
         },
     }
     return payload

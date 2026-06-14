@@ -63,6 +63,12 @@ function Dashboard() {
             チャット別
           </a>
           <a
+            className="button button--light"
+            href="/cursor"
+          >
+            Cursor
+          </a>
+          <a
             className="text-link"
             href="https://github.com/skylandvc/token-meter"
             rel="noreferrer"

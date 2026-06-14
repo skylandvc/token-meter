@@ -33,9 +33,20 @@ def scrub_thread(thread):
     }
 
 
+def scrub_cursor_item(item):
+    session_id = str(item.get("sessionId") or "")
+    return {
+        **item,
+        "sessionId": session_id[:8],
+        "file": scrub_path(item.get("file")),
+        "projectPath": scrub_path(item.get("projectPath")),
+    }
+
+
 def public_snapshot(usage):
     projects = usage.get("projects") or {}
     threads = usage.get("threads") or {}
+    cursor = usage.get("cursor") or {}
     return {
         "generatedAt": usage.get("generatedAt"),
         "snapshotMode": "vercel_static",
@@ -46,6 +57,16 @@ def public_snapshot(usage):
         "threads": {
             "maxMonth": threads.get("maxMonth", 1),
             "items": [scrub_thread(item) for item in threads.get("items", [])],
+        },
+        "cursor": {
+            "source": cursor.get("source"),
+            "note": cursor.get("note"),
+            "files": cursor.get("files", 0),
+            "activeDays": cursor.get("activeDays", 1),
+            "maxMonth": cursor.get("maxMonth", 1),
+            "totals": cursor.get("totals"),
+            "series": cursor.get("series"),
+            "items": [scrub_cursor_item(item) for item in cursor.get("items", [])],
         },
     }
 

@@ -16,6 +16,9 @@ export default function ThreadsPage() {
           <a className="button button--light" href="/projects">
             Projects
           </a>
+          <a className="button button--light" href="/cursor">
+            Cursor
+          </a>
           <a
             className="text-link"
             href="https://github.com/skylandvc/token-meter"

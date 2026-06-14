@@ -1,23 +1,23 @@
-import ProjectUsagePanel from "./project-usage-panel";
+import CursorUsagePanel from "./cursor-usage-panel";
 
-export default function ProjectsPage() {
+export default function CursorPage() {
   return (
     <main className="shell">
       <header className="topbar">
         <div>
-          <p className="eyebrow">Local project usage</p>
-          <h1>Project Tokens</h1>
+          <p className="eyebrow">Local Cursor usage</p>
+          <h1>Cursor Usage</h1>
         </div>
         <div className="account">
-          <span>このPCのローカルログをプロジェクト別に集計</span>
+          <span>Cursorのagent transcriptから推定集計</span>
           <a className="button button--light" href="/">
             Dashboard
           </a>
+          <a className="button button--light" href="/projects">
+            Projects
+          </a>
           <a className="button button--light" href="/threads">
             Chats
-          </a>
-          <a className="button button--light" href="/cursor">
-            Cursor
           </a>
           <a
             className="text-link"
@@ -29,7 +29,7 @@ export default function ProjectsPage() {
           </a>
         </div>
       </header>
-      <ProjectUsagePanel />
+      <CursorUsagePanel />
     </main>
   );
 }
