@@ -65,6 +65,7 @@ def public_snapshot(usage):
             "activeDays": cursor.get("activeDays", 1),
             "maxMonth": cursor.get("maxMonth", 1),
             "totals": cursor.get("totals"),
+            "capacity": cursor.get("capacity"),
             "series": cursor.get("series"),
             "items": [scrub_cursor_item(item) for item in cursor.get("items", [])],
         },

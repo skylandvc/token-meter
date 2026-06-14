@@ -152,6 +152,49 @@ function CursorMetric({ label, value, note }) {
   );
 }
 
+function capacityBasisLabel(basis) {
+  return basis === "manual" ? "手入力上限" : "過去最大から推定";
+}
+
+function CursorCapacityItem({ label, item }) {
+  const usedPercent = Number(item?.usedPercent) || 0;
+  return (
+    <article className="cursor-capacity-item">
+      <div>
+        <span>{label}</span>
+        <strong>{Math.round(usedPercent)}% 使用済み</strong>
+      </div>
+      <div className="capacity-gauge capacity-gauge--codex">
+        <span style={{ width: `${percent(usedPercent, 100)}%` }} />
+      </div>
+      <p>
+        {formatTokens(item?.usedTokens)} / {formatTokens(item?.limitTokens)} · {capacityBasisLabel(item?.basis)}
+      </p>
+    </article>
+  );
+}
+
+function CursorCapacityPanel({ cursor }) {
+  const capacity = cursor.capacity || {};
+  return (
+    <section className="panel cursor-capacity-panel">
+      <div className="panel-head">
+        <div>
+          <p className="eyebrow">Cursor Estimated Capacity</p>
+          <h2>推定キャパ</h2>
+        </div>
+        <span>公式上限ではありません</span>
+      </div>
+      <p className="muted">{capacity.note || "過去ログから推定した目安です。"}</p>
+      <div className="cursor-capacity-grid">
+        <CursorCapacityItem label="日次" item={capacity.daily} />
+        <CursorCapacityItem label="週次" item={capacity.weekly} />
+        <CursorCapacityItem label="月次" item={capacity.monthly} />
+      </div>
+    </section>
+  );
+}
+
 function CursorRow({ item, scale, rank }) {
   const month = item.month?.total || 0;
   return (
@@ -325,6 +368,8 @@ export default function CursorUsagePanel() {
         </div>
         <strong>{formatTokens(cursor.totals?.month?.total)}</strong>
       </section>
+
+      <CursorCapacityPanel cursor={cursor} />
 
       <section className="metric-grid" aria-label="Cursor期間別使用量">
         <CursorMetric label="日次" value={cursor.totals?.today?.total} note={`${cursor.totals?.today?.events || 0} events`} />

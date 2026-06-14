@@ -37,6 +37,9 @@ CLAUDE_WEEKLY_LIMIT = int(os.environ.get("TOKEN_METER_CLAUDE_WEEKLY_LIMIT", "0")
 CLAUDE_SESSION_WINDOW_MINUTES = int(
     os.environ.get("TOKEN_METER_CLAUDE_SESSION_WINDOW_MINUTES", "300") or "300"
 )
+CURSOR_DAILY_LIMIT = int(os.environ.get("TOKEN_METER_CURSOR_DAILY_LIMIT", "0") or "0")
+CURSOR_WEEKLY_LIMIT = int(os.environ.get("TOKEN_METER_CURSOR_WEEKLY_LIMIT", "0") or "0")
+CURSOR_MONTHLY_LIMIT = int(os.environ.get("TOKEN_METER_CURSOR_MONTHLY_LIMIT", "0") or "0")
 CORS_ALLOWED_ORIGINS = {
     origin.strip().rstrip("/")
     for origin in os.environ.get(
@@ -650,12 +653,41 @@ def build_cursor_summary(events, today, week_start, month_start):
             }
         )
     items.sort(key=lambda item: (item["month"]["total"], item["all"]["total"]), reverse=True)
+    max_daily = max(daily_totals.values() or [0])
+    daily_limit = cursor_limit(CURSOR_DAILY_LIMIT, max(max_daily, totals["today"]["total"]))
+    weekly_limit = cursor_limit(
+        CURSOR_WEEKLY_LIMIT,
+        max(totals["week"]["total"], max_daily * 7, totals["averageDay"]["total"] * 7),
+    )
+    monthly_limit = cursor_limit(
+        CURSOR_MONTHLY_LIMIT,
+        max(totals["month"]["total"], max_daily * 30, totals["averageDay"]["total"] * 30),
+    )
     return {
         "source": "estimated_from_cursor_agent_transcripts",
         "note": "Cursor の agent transcript から文字量ベースで推定したトークン数です。公式Usageではありません。",
         "files": len(list(discover_cursor_files())),
         "activeDays": active_days,
         "totals": totals,
+        "capacity": {
+            "source": "manual_env_or_observed_peak_estimate",
+            "note": "Cursor公式の上限ではなく、手入力上限または過去ログ最大値から推定したキャパです。",
+            "daily": {
+                "usedTokens": totals["today"]["total"],
+                "usedPercent": usage_percent(totals["today"]["total"], daily_limit["limitTokens"]),
+                **daily_limit,
+            },
+            "weekly": {
+                "usedTokens": totals["week"]["total"],
+                "usedPercent": usage_percent(totals["week"]["total"], weekly_limit["limitTokens"]),
+                **weekly_limit,
+            },
+            "monthly": {
+                "usedTokens": totals["month"]["total"],
+                "usedPercent": usage_percent(totals["month"]["total"], monthly_limit["limitTokens"]),
+                **monthly_limit,
+            },
+        },
         "series": build_series(daily_totals, today),
         "items": items[:50],
         "maxMonth": max([item["month"]["total"] for item in items] + [1]),
@@ -716,6 +748,26 @@ def usage_percent(total, limit):
     if not limit:
         return None
     return min(100, round((total / limit) * 100, 1))
+
+
+def round_capacity(value):
+    if value <= 0:
+        return 0
+    magnitude = 10 ** max(0, len(str(int(value))) - 2)
+    return int(((value + magnitude - 1) // magnitude) * magnitude)
+
+
+def cursor_limit(manual_limit, observed_value):
+    if manual_limit:
+        return {
+            "limitTokens": manual_limit,
+            "basis": "manual",
+        }
+    estimated = round_capacity(max(1, observed_value) * 1.25)
+    return {
+        "limitTokens": estimated,
+        "basis": "estimated_from_observed_peak",
+    }
 
 
 def build_claude_capacity(events, now, week_start):
