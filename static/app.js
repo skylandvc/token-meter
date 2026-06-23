@@ -15,7 +15,7 @@
       updated: PRICING_UPDATED,
       service: "Codex",
       plan: "Plus",
-      price: "$20 / month",
+      price: "$20/月",
       renewsOn: "未設定",
       detail: "現在の契約として表示。Codex の rate limit ログがある場合は残キャパを実測寄りで表示します。",
       note: "契約名は手動設定です。ローカルログ上の plan_type は未検出です。",

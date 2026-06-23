@@ -11,7 +11,7 @@ const CONTRACTS = [
   {
     service: "Codex",
     plan: "Plus",
-    price: "$20 / month",
+    price: "$20/月",
     renewal: "未設定",
     tone: "codex",
   },
