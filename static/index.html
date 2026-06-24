@@ -150,6 +150,25 @@
         </article>
       </section>
 
+      <section class="manual-plan-section" aria-label="契約プラン（手動設定）">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Manual settings</p>
+            <h2>契約プラン（手動設定）</h2>
+            <p class="pricing-note manual-plan-note">
+              契約プラン・料金は自動取得されません。このブラウザに手動で入力した内容だけを表示します。
+            </p>
+          </div>
+          <div class="manual-plan-actions">
+            <button class="button button--light" id="manualPlanEdit" type="button">編集</button>
+            <button class="button button--light" id="manualPlanCancel" type="button" hidden>キャンセル</button>
+            <button class="button" id="manualPlanSave" type="button" hidden>保存</button>
+          </div>
+        </div>
+        <div class="pricing-grid manual-plan-grid" id="manualPlanGrid"></div>
+        <p class="manual-plan-saved" id="manualPlanSaved" hidden></p>
+      </section>
+
     </main>
     <script src="/app.js?v=20260605-codex-plus"></script>
   </body>

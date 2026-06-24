@@ -299,4 +299,197 @@
 
   refresh();
   window.setInterval(refresh, POLL_MS);
+
+  const MANUAL_PLAN_STORAGE_KEY = "token-meter-manual-plans";
+  const MANUAL_SERVICES = [
+    { id: "claude", label: "Claude Code", tone: "claude" },
+    { id: "codex", label: "Codex", tone: "codex" },
+    { id: "cursor", label: "Cursor", tone: "cursor" },
+  ];
+
+  function createEmptyManualPlans() {
+    return {
+      claude: { planName: "", monthlyFee: "", renewalDate: "" },
+      codex: { planName: "", monthlyFee: "", renewalDate: "" },
+      cursor: { planName: "", monthlyFee: "", renewalDate: "" },
+    };
+  }
+
+  function normalizeManualPlans(raw) {
+    const base = createEmptyManualPlans();
+    if (!raw || typeof raw !== "object") {
+      return base;
+    }
+    MANUAL_SERVICES.forEach((service) => {
+      const item = raw[service.id];
+      if (!item || typeof item !== "object") {
+        return;
+      }
+      base[service.id] = {
+        planName: typeof item.planName === "string" ? item.planName : "",
+        monthlyFee: typeof item.monthlyFee === "string" ? item.monthlyFee : "",
+        renewalDate: typeof item.renewalDate === "string" ? item.renewalDate : "",
+      };
+    });
+    return base;
+  }
+
+  function loadManualPlans() {
+    try {
+      const cached = localStorage.getItem(MANUAL_PLAN_STORAGE_KEY);
+      if (!cached) {
+        return createEmptyManualPlans();
+      }
+      return normalizeManualPlans(JSON.parse(cached));
+    } catch {
+      return createEmptyManualPlans();
+    }
+  }
+
+  function saveManualPlans(plans) {
+    localStorage.setItem(MANUAL_PLAN_STORAGE_KEY, JSON.stringify(normalizeManualPlans(plans)));
+  }
+
+  function displayManualValue(value) {
+    return value && value.trim() ? value.trim() : "未設定";
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function formatManualMonthlyFee(value) {
+    if (!value || !value.trim()) {
+      return "未設定";
+    }
+    const normalized = value.trim().replace(/,/g, "");
+    if (/^\d+(\.\d+)?$/.test(normalized)) {
+      const amount = Number(normalized);
+      if (Number.isFinite(amount)) {
+        return `¥${amount.toLocaleString("ja-JP")}`;
+      }
+    }
+    return value.trim();
+  }
+
+  function formatManualRenewalDate(value) {
+    if (!value || !value.trim()) {
+      return "未設定";
+    }
+    const date = new Date(`${value.trim()}T00:00:00`);
+    if (Number.isNaN(date.getTime())) {
+      return value.trim();
+    }
+    return new Intl.DateTimeFormat("ja-JP", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date);
+  }
+
+  const manualPlanState = {
+    plans: createEmptyManualPlans(),
+    draft: createEmptyManualPlans(),
+    editing: false,
+  };
+
+  function manualPlanPanelHtml(service, plan, editing) {
+    const current = editing ? manualPlanState.draft[service.id] : plan;
+    const planName = escapeHtml(displayManualValue(current.planName));
+    const monthlyFee = escapeHtml(formatManualMonthlyFee(current.monthlyFee));
+    const renewalDate = escapeHtml(formatManualRenewalDate(current.renewalDate));
+
+    if (editing) {
+      return `<article class="pricing-panel pricing-panel--${service.tone}">
+        <div class="pricing-panel__head">
+          <div>
+            <p class="eyebrow">${service.label}</p>
+            <h2>編集中</h2>
+          </div>
+        </div>
+        <div class="manual-plan-fields">
+          <label class="manual-plan-field">
+            <span>プラン名</span>
+            <input type="text" data-service="${service.id}" data-field="planName" value="${escapeHtml(current.planName || "")}" placeholder="例: Pro" autocomplete="off">
+          </label>
+          <label class="manual-plan-field">
+            <span>月額</span>
+            <input type="text" data-service="${service.id}" data-field="monthlyFee" value="${escapeHtml(current.monthlyFee || "")}" placeholder="例: 3000 または $20" autocomplete="off">
+          </label>
+          <label class="manual-plan-field">
+            <span>次回更新日</span>
+            <input type="date" data-service="${service.id}" data-field="renewalDate" value="${current.renewalDate || ""}">
+          </label>
+        </div>
+      </article>`;
+    }
+
+    return `<article class="pricing-panel pricing-panel--${service.tone}">
+      <div class="pricing-panel__head">
+        <div>
+          <p class="eyebrow">${service.label}</p>
+          <h2>${planName}</h2>
+        </div>
+        <span>${monthlyFee}</span>
+      </div>
+      <div class="manual-plan-display">
+        <div class="manual-plan-display__row"><span>プラン名</span><strong>${planName}</strong></div>
+        <div class="manual-plan-display__row"><span>月額</span><strong>${monthlyFee}</strong></div>
+        <div class="manual-plan-display__row"><span>次回更新日</span><strong>${renewalDate}</strong></div>
+      </div>
+    </article>`;
+  }
+
+  function renderManualPlans() {
+    $("manualPlanGrid").innerHTML = MANUAL_SERVICES.map((service) =>
+      manualPlanPanelHtml(service, manualPlanState.plans[service.id], manualPlanState.editing)
+    ).join("");
+
+    $("manualPlanEdit").hidden = manualPlanState.editing;
+    $("manualPlanCancel").hidden = !manualPlanState.editing;
+    $("manualPlanSave").hidden = !manualPlanState.editing;
+
+    if (manualPlanState.editing) {
+      $("manualPlanGrid").querySelectorAll("input[data-service]").forEach((input) => {
+        input.addEventListener("input", () => {
+          const serviceId = input.dataset.service;
+          const field = input.dataset.field;
+          manualPlanState.draft[serviceId][field] = input.value;
+        });
+      });
+    }
+  }
+
+  function setManualPlanEditing(editing) {
+    manualPlanState.editing = editing;
+    if (editing) {
+      manualPlanState.draft = normalizeManualPlans(manualPlanState.plans);
+      $("manualPlanSaved").hidden = true;
+    }
+    renderManualPlans();
+  }
+
+  $("manualPlanEdit").addEventListener("click", () => setManualPlanEditing(true));
+  $("manualPlanCancel").addEventListener("click", () => {
+    manualPlanState.draft = normalizeManualPlans(manualPlanState.plans);
+    setManualPlanEditing(false);
+  });
+  $("manualPlanSave").addEventListener("click", () => {
+    manualPlanState.plans = normalizeManualPlans(manualPlanState.draft);
+    saveManualPlans(manualPlanState.plans);
+    setManualPlanEditing(false);
+    $("manualPlanSaved").hidden = false;
+    $("manualPlanSaved").textContent = `保存しました（${new Intl.DateTimeFormat("ja-JP", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date())}）`;
+  });
+
+  manualPlanState.plans = loadManualPlans();
+  manualPlanState.draft = normalizeManualPlans(manualPlanState.plans);
+  renderManualPlans();
 })();

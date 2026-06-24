@@ -1,4 +1,5 @@
 import LocalUsagePanel from "./local-usage-panel";
+import ManualPlanSettings from "./manual-plan-settings";
 
 function Dashboard() {
   return (
@@ -40,6 +41,7 @@ function Dashboard() {
       </header>
 
       <LocalUsagePanel />
+      <ManualPlanSettings />
     </main>
   );
 }

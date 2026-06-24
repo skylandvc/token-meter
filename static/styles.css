@@ -260,6 +260,147 @@ h2 {
   line-height: 1.55;
 }
 
+.manual-plan-section {
+  margin-top: 18px;
+  padding: 20px;
+  display: grid;
+  gap: 18px;
+  border: 1px solid rgba(221, 227, 234, 0.9);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.manual-plan-section h2 {
+  margin-top: 4px;
+  font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+}
+
+.manual-plan-note {
+  margin-top: 8px;
+  max-width: 720px;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.manual-plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.button {
+  min-height: 42px;
+  padding: 0 16px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.button--light {
+  background: #fff;
+  color: var(--ink);
+}
+
+.manual-plan-grid {
+  margin-top: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pricing-panel--cursor {
+  border-left: 5px solid #7c3aed;
+}
+
+.manual-plan-display {
+  display: grid;
+  gap: 10px;
+}
+
+.manual-plan-display__row {
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: minmax(96px, auto) 1fr;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+}
+
+.manual-plan-display__row span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.manual-plan-display__row strong {
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.manual-plan-fields {
+  display: grid;
+  gap: 12px;
+}
+
+.manual-plan-field {
+  display: grid;
+  gap: 6px;
+}
+
+.manual-plan-field span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.manual-plan-field input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.manual-plan-field input:focus {
+  outline: 2px solid rgba(47, 111, 236, 0.18);
+  border-color: var(--blue);
+}
+
+.manual-plan-saved {
+  margin: 0;
+  color: var(--green);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.pricing-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pricing-panel__head h2 {
+  margin-top: 4px;
+  font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+}
+
 .capacity-card {
   padding: clamp(18px, 3vw, 28px);
   border-radius: 8px;
@@ -579,6 +720,7 @@ h2 {
   .topbar,
   .capacity-grid,
   .pricing-grid,
+  .manual-plan-grid,
   .hero-panel,
   .today-split,
   .agent-grid,
@@ -589,6 +731,16 @@ h2 {
 
   .topbar {
     align-items: start;
+  }
+
+  .section-head {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .manual-plan-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .status {
@@ -631,6 +783,14 @@ h2 {
   .pricing-row {
     align-items: start;
     grid-template-columns: 1fr;
+  }
+
+  .manual-plan-display__row {
+    grid-template-columns: 1fr;
+  }
+
+  .manual-plan-display__row strong {
+    text-align: left;
   }
 
   .source-row {
