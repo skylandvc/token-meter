@@ -59,9 +59,16 @@ function formatDateTime(iso) {
   }).format(new Date(iso));
 }
 
-function formatCapacityLabel(item) {
+function formatCapacityLabel(item, tone) {
   if (typeof item.usedPercent === "number") {
-    return `${Math.round(item.usedPercent)}% 使用済み`;
+    const pct = Math.round(item.usedPercent);
+    if (tone === "codex" && item.usedTokens == null && item.limitTokens == null) {
+      return `公式上限ログ ${pct}%`;
+    }
+    if (tone === "claude" && item.limitTokens) {
+      return `推定 ${pct}%`;
+    }
+    return `${pct}% 使用済み`;
   }
   if (item.limitTokens) {
     return `${formatTokens(item.usedTokens || 0)} / ${formatTokens(item.limitTokens)}`;
@@ -141,7 +148,7 @@ function drawCapacityCard(ctx, x, y, width, title, label, plan, windows, tone) {
     drawText(ctx, item.label, x + 28, top, { size: 18, weight: 800 });
     drawText(ctx, formatResetDetail(item), x + 28, top + 24, { size: 16, color: "#667085" });
     drawGauge(ctx, x + 230, top + 12, 220, hasPercent ? item.usedPercent : 0, 100, color, tone === "claude" ? "#23a36b" : null);
-    drawText(ctx, formatCapacityLabel(item), x + width - 28, top + 6, { size: 18, weight: 800, align: "right" });
+    drawText(ctx, formatCapacityLabel(item, tone), x + width - 28, top + 6, { size: 18, weight: 800, align: "right" });
   });
 }
 
@@ -283,7 +290,7 @@ function CapacityWindow({ item, tone }) {
         <strong>{item.label}</strong>
         <span>{formatResetDetail(item)}</span>
       </div>
-      <b>{formatCapacityLabel(item)}</b>
+      <b>{formatCapacityLabel(item, tone)}</b>
       <div className={`capacity-gauge capacity-gauge--${tone}`}>
         <span style={{ width: `${hasPercent ? Math.max(0, Math.min(100, item.usedPercent)) : 0}%` }} />
       </div>

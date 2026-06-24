@@ -2,7 +2,7 @@
 
 ![Token Meter dashboard preview](docs/token-meter-dashboard-2026-06-06.png)
 
-Codex と Claude Code のトークン使用量を確認するためのダッシュボードです。
+Codex と Claude Code のトークン使用量を確認するためのダッシュボードです。UI の見た目方針はリポジトリ直下の `DESIGN.md`（Operations Console）を参照してください。
 
 公開版:
 

@@ -6,7 +6,7 @@ function Dashboard() {
     <main className="shell">
       <header className="topbar">
         <div>
-          <p className="eyebrow">Public dashboard</p>
+          <p className="eyebrow">Operations console</p>
           <h1>Token Meter</h1>
         </div>
         <div className="account">

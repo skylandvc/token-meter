@@ -61,9 +61,16 @@
     }).format(new Date(iso));
   }
 
-  function formatCapacityLabel(window) {
+  function formatCapacityLabel(window, tone) {
     if (typeof window.usedPercent === "number") {
-      return `${Math.round(window.usedPercent)}% 使用済み`;
+      const pct = Math.round(window.usedPercent);
+      if (tone === "codex" && window.usedTokens == null && window.limitTokens == null) {
+        return `公式上限ログ ${pct}%`;
+      }
+      if (tone === "claude" && window.limitTokens) {
+        return `推定 ${pct}%`;
+      }
+      return `${pct}% 使用済み`;
     }
     if (window.limitTokens) {
       return `${formatTokens(window.usedTokens || 0)} / ${formatTokens(window.limitTokens)}`;
@@ -91,7 +98,7 @@
         <strong>${window.label}</strong>
         <span>${reset || ""}</span>
       </div>
-      <b>${formatCapacityLabel(window)}</b>
+      <b>${formatCapacityLabel(window, tone)}</b>
       <div class="capacity-gauge capacity-gauge--${tone}">
         <span style="width:${pct}%"></span>
       </div>

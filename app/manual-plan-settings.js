@@ -199,7 +199,7 @@ export default function ManualPlanSettings() {
         <div>
           <p className="eyebrow">Manual settings</p>
           <h2>契約プラン（手動設定）</h2>
-          <p className="pricing-note manual-plan-note">
+          <p className="pricing-note manual-plan-note muted">
             契約プラン・料金は自動取得されません。このブラウザに手動で入力した内容だけを表示します。
           </p>
         </div>
