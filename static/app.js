@@ -1,26 +1,5 @@
 (function () {
   const POLL_MS = 10000;
-  const PRICING_UPDATED = "2026-06-05";
-  const CONTRACTS = {
-    claude: {
-      updated: PRICING_UPDATED,
-      service: "Claude Code",
-      plan: "Pro",
-      price: "$20 / month",
-      renewsOn: "未設定",
-      detail: "現在の契約として表示。Claude Code のローカルログから使用量を推定します。",
-      note: "契約名は手動設定です。残キャパは公式UI側が基準です。",
-    },
-    codex: {
-      updated: PRICING_UPDATED,
-      service: "Codex",
-      plan: "Plus",
-      price: "$20/月",
-      renewsOn: "未設定",
-      detail: "現在の契約として表示。Codex の rate limit ログがある場合は残キャパを実測寄りで表示します。",
-      note: "契約名は手動設定です。ローカルログ上の plan_type は未検出です。",
-    },
-  };
 
   const $ = (id) => document.getElementById(id);
 
@@ -131,31 +110,6 @@
     const capacity = data.capacity || {};
     renderCapacityPanel("codex", capacity.codex || {}, "codex");
     renderCapacityPanel("claude", capacity.claude || {}, "claude");
-  }
-
-  function contractCard(contract) {
-    return `<div class="pricing-row pricing-row--current">
-      <div>
-        <span>${contract.service}</span>
-        <strong>${contract.plan}</strong>
-        <em>次回更新日 ${contract.renewsOn}</em>
-        <small>${contract.detail}</small>
-      </div>
-      <b>${contract.price}</b>
-    </div>`;
-  }
-
-  function renderPricingPanel(prefix, contract) {
-    $(`${prefix}PricingUpdated`).textContent = `確認日 ${contract.updated}`;
-    $(`${prefix}Pricing`).innerHTML = [
-      contractCard(contract),
-      `<p class="pricing-note">${contract.note}</p>`,
-    ].join("");
-  }
-
-  function renderPricing() {
-    renderPricingPanel("claude", CONTRACTS.claude);
-    renderPricingPanel("codex", CONTRACTS.codex);
   }
 
   function renderMetrics(data) {
@@ -343,7 +297,6 @@
     }
   }
 
-  renderPricing();
   refresh();
   window.setInterval(refresh, POLL_MS);
 })();
