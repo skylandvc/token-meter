@@ -7,6 +7,7 @@ const INSTALL_HELP_URL = "https://github.com/skylandvc/token-meter#アプリと�
 export default function PwaInstallButton() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installed, setInstalled] = useState(false);
+  const [promptUsed, setPromptUsed] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -37,15 +38,19 @@ export default function PwaInstallButton() {
   async function installApp() {
     if (!installPrompt) return;
     installPrompt.prompt();
-    await installPrompt.userChoice;
+    const choice = await installPrompt.userChoice;
     setInstallPrompt(null);
+    setPromptUsed(true);
+    if (choice?.outcome === "accepted") {
+      setInstalled(true);
+    }
   }
 
   if (installed) {
     return <span className="install-status">ブラウザアプリで起動中</span>;
   }
 
-  if (installPrompt) {
+  if (installPrompt && !promptUsed) {
     return (
       <button className="button button--light" onClick={installApp} type="button">
         ブラウザに追加
@@ -55,7 +60,7 @@ export default function PwaInstallButton() {
 
   return (
     <a className="button button--light" href={INSTALL_HELP_URL} rel="noreferrer" target="_blank">
-      ブラウザに追加
+      追加手順
     </a>
   );
 }
