@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+const INSTALL_HELP_URL = "https://github.com/skylandvc/token-meter#アプリとしてインストール";
+
 export default function PwaInstallButton() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installed, setInstalled] = useState(false);
@@ -40,16 +42,20 @@ export default function PwaInstallButton() {
   }
 
   if (installed) {
-    return <span className="install-status">アプリとして起動中</span>;
+    return <span className="install-status">ブラウザアプリで起動中</span>;
   }
 
   if (installPrompt) {
     return (
       <button className="button button--light" onClick={installApp} type="button">
-        インストール
+        ブラウザに追加
       </button>
     );
   }
 
-  return <span className="install-status">インストール対応</span>;
+  return (
+    <a className="button button--light" href={INSTALL_HELP_URL} rel="noreferrer" target="_blank">
+      ブラウザに追加
+    </a>
+  );
 }
