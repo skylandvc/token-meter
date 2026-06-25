@@ -11,11 +11,11 @@
     "snapshot": "python3 scripts/export_usage_snapshot.py",
     "start": "next start",
     "desktop:dev": "electron .",
-    "desktop:pack": "electron-builder --dir",
-    "desktop:dist": "electron-builder",
-    "desktop:dist:mac": "electron-builder --mac dmg zip",
-    "desktop:dist:mac:zip": "electron-builder --mac zip",
-    "desktop:dist:win": "electron-builder --win nsis"
+    "desktop:pack": "electron-builder --dir --publish never",
+    "desktop:dist": "electron-builder --publish never",
+    "desktop:dist:mac": "electron-builder --mac dmg zip --publish never",
+    "desktop:dist:mac:zip": "electron-builder --mac zip --publish never",
+    "desktop:dist:win": "electron-builder --win nsis --publish never"
   },
   "dependencies": {
     "next": "^15.5.0",
