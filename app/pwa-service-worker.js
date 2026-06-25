@@ -7,9 +7,12 @@ export default function PwaServiceWorker() {
     if (process.env.NODE_ENV !== "production") return;
     if (!("serviceWorker" in navigator)) return;
 
-    navigator.serviceWorker.register("/sw.js").catch(() => {
-      // PWA registration is optional; the dashboard should continue to work.
-    });
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => registration.update())
+      .catch(() => {
+        // PWA registration is optional; the dashboard should continue to work.
+      });
   }, []);
 
   return null;

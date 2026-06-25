@@ -1,4 +1,4 @@
-const CACHE_NAME = "token-meter-pwa-v1";
+const CACHE_NAME = "token-meter-pwa-v2";
 const APP_SHELL = [
   "/",
   "/?guest=1",
