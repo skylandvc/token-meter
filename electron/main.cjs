@@ -24,10 +24,10 @@ function isExternalHttpUrl(url) {
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
-    width: 1280,
+    width: 760,
     height: 840,
-    minWidth: 960,
-    minHeight: 640,
+    minWidth: 360,
+    minHeight: 520,
     title: "Token Meter",
     webPreferences: {
       contextIsolation: true,
