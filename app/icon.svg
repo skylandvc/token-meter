@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Token Meter">
+  <rect width="512" height="512" rx="96" fill="#1a2332"/>
+  <rect x="56" y="56" width="400" height="400" rx="48" fill="#eceef3"/>
+  <rect x="196" y="128" width="120" height="36" rx="8" fill="#1a2332"/>
+  <rect x="226" y="128" width="60" height="180" rx="8" fill="#1a2332"/>
+  <rect x="112" y="368" width="288" height="48" rx="12" fill="#e2e6ec"/>
+  <rect x="112" y="368" width="196" height="48" rx="12" fill="#2563eb"/>
+</svg>

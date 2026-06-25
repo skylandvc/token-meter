@@ -6,8 +6,12 @@ export const metadata = {
   description: "Codex / Claude Code / Cursor のローカルトークン使用量を確認するダッシュボードです。",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/icons/icon.svg",
-    apple: "/icons/icon.svg",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/apple-icon.svg",
   },
   appleWebApp: {
     capable: true,
