@@ -49,11 +49,12 @@ export default function PwaInstallButton() {
   function openAppWindow() {
     const appUrl = new URL("/", window.location.origin);
     appUrl.searchParams.set("guest", "1");
-    window.open(
+    const openedWindow = window.open(
       appUrl.toString(),
-      "_blank",
-      "popup=yes,width=420,height=840,left=80,top=80,noopener,noreferrer",
+      "token-meter-app",
+      "width=420,height=840,left=80,top=80,noopener,noreferrer",
     );
+    openedWindow?.focus?.();
   }
 
   if (installed) {
@@ -61,7 +62,7 @@ export default function PwaInstallButton() {
       <>
         <span className="install-status">ブラウザアプリで起動中</span>
         <button className="button button--light" onClick={openAppWindow} type="button">
-          別窓で開く
+          小窓で開く
         </button>
       </>
     );
@@ -74,7 +75,7 @@ export default function PwaInstallButton() {
           ブラウザに追加
         </button>
         <button className="button button--light" onClick={openAppWindow} type="button">
-          別窓で開く
+          小窓で開く
         </button>
       </>
     );
@@ -86,7 +87,7 @@ export default function PwaInstallButton() {
         追加手順
       </a>
       <button className="button button--light" onClick={openAppWindow} type="button">
-        別窓で開く
+        小窓で開く
       </button>
     </>
   );
