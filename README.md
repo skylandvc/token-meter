@@ -21,6 +21,55 @@ Token Meter はPWAとしてインストールできます。
 
 インストール後も、ローカル使用量を表示するには各PCでローカル版 Token Meter の自動起動設定が必要です。
 
+## ダウンロード版アプリ（Mac / Windows）
+
+Token Meter は Electron ベースのデスクトップアプリとしても配布できます。PWA とは別の導線です。既存の PWA 構成はそのまま使えます。
+
+### ユーザー向け（将来）
+
+GitHub Releases から OS 向けのインストーラーをダウンロードして起動します。
+
+- Mac: `.dmg` または `.zip`
+- Windows: `.exe`（NSIS インストーラー）
+
+アプリ本体は Vercel 版（または開発時に指定した URL）を表示するシェルです。**ローカル使用量を表示するには、各 PC でローカル版 Token Meter（`server.py`）の自動起動設定が別途必要**です。ダウンロード版だけでは、PC 内の Codex / Claude Code ログは読めません。
+
+### 開発者向け
+
+依存関係のインストール:
+
+```bash
+npm install
+```
+
+開発中に Electron ウィンドウで起動:
+
+```bash
+npm run desktop:dev
+```
+
+既定では `https://token-meterz.vercel.app/?guest=1` を開きます。別 URL（ローカル Next など）を使う場合:
+
+```bash
+TOKEN_METER_APP_URL=http://127.0.0.1:3000/?guest=1 npm run desktop:dev
+```
+
+パッケージ確認（インストーラーなしの展開版）:
+
+```bash
+npm run desktop:pack
+```
+
+配布用ビルド:
+
+```bash
+npm run desktop:dist:mac:zip
+npm run desktop:dist:mac
+npm run desktop:dist:win
+```
+
+Macでまずダウンロード配布できる形を作る場合は `desktop:dist:mac:zip` が簡単です。成果物は `dist/` に出力されます。GitHub Actions から手動ビルドする場合は、リポジトリの `Desktop Release Build` ワークフロー（`.github/workflows/desktop-release.yml`）を `workflow_dispatch` で実行し、artifact から `dist/` を取得できます。
+
 ## セットアップ
 
 公開版だけでは、各自のPC内にある Codex / Claude Code のローカルログを直接読むことはできません。

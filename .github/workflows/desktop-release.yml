@@ -1,0 +1,42 @@
+name: Desktop Release Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            npm-script: desktop:dist:mac:zip
+            artifact-name: desktop-macos
+          - os: windows-latest
+            npm-script: desktop:dist:win
+            artifact-name: desktop-windows
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build desktop installers
+        run: npm run ${{ matrix.npm-script }}
+
+      - name: Upload dist artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: dist/
+          if-no-files-found: error

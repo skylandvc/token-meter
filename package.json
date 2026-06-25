@@ -2,11 +2,20 @@
   "name": "token-meter",
   "version": "0.1.0",
   "private": true,
+  "description": "Local AI token usage dashboard for Codex, Claude Code, and Cursor.",
+  "author": "Skyland Ventures",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "snapshot": "python3 scripts/export_usage_snapshot.py",
-    "start": "next start"
+    "start": "next start",
+    "desktop:dev": "electron .",
+    "desktop:pack": "electron-builder --dir",
+    "desktop:dist": "electron-builder",
+    "desktop:dist:mac": "electron-builder --mac dmg zip",
+    "desktop:dist:mac:zip": "electron-builder --mac zip",
+    "desktop:dist:win": "electron-builder --win nsis"
   },
   "dependencies": {
     "next": "^15.5.0",
@@ -14,5 +23,31 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "vc.skyland.token-meter",
+    "productName": "Token Meter",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  }
 }
