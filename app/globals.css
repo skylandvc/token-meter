@@ -23,7 +23,7 @@
 
 body {
   margin: 0;
-  min-width: 340px;
+  min-width: 280px;
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 0.875rem;
   color: var(--ink);
@@ -1135,7 +1135,7 @@ h2 {
 
 @media (max-width: 640px) {
   body {
-    min-width: 320px;
+    min-width: 280px;
     font-size: 0.82rem;
   }
 
@@ -1274,6 +1274,76 @@ h2 {
   }
 
   .metric-card > strong {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 360px) {
+  body {
+    font-size: 0.76rem;
+  }
+
+  .topbar {
+    padding: 10px 8px;
+  }
+
+  .topbar h1 {
+    font-size: 1.12rem;
+  }
+
+  .topbar .eyebrow,
+  .account > span:first-child,
+  .install-status,
+  .text-link {
+    display: none;
+  }
+
+  .account {
+    gap: 5px;
+  }
+
+  .button {
+    min-height: 28px;
+    padding: 0 8px;
+    font-size: 0.68rem;
+  }
+
+  .local-toolbar {
+    padding: 8px;
+  }
+
+  .local-toolbar__copy {
+    font-size: 0.68rem;
+    line-height: 1.45;
+  }
+
+  .capacity-card {
+    padding: 10px 8px;
+  }
+
+  .capacity-card__head h2 {
+    font-size: 0.92rem;
+  }
+
+  .capacity-card__head > span,
+  .capacity-window__text span {
+    font-size: 0.66rem;
+  }
+
+  .capacity-window {
+    padding: 8px;
+    grid-template-columns: 1fr;
+  }
+
+  .capacity-window > b {
+    text-align: left;
+  }
+
+  .hero-panel {
+    padding: 12px 8px;
+  }
+
+  .hero-copy strong {
     font-size: 2rem;
   }
 }
