@@ -69,15 +69,25 @@ export default function PwaInstallButton() {
 
   if (installPrompt && !promptUsed) {
     return (
-      <button className="button button--light" onClick={installApp} type="button">
-        ブラウザに追加
-      </button>
+      <>
+        <button className="button button--light" onClick={installApp} type="button">
+          ブラウザに追加
+        </button>
+        <button className="button button--light" onClick={openAppWindow} type="button">
+          別窓で開く
+        </button>
+      </>
     );
   }
 
   return (
-    <a className="button button--light" href={INSTALL_HELP_URL} rel="noreferrer" target="_blank">
-      追加手順
-    </a>
+    <>
+      <a className="button button--light" href={INSTALL_HELP_URL} rel="noreferrer" target="_blank">
+        追加手順
+      </a>
+      <button className="button button--light" onClick={openAppWindow} type="button">
+        別窓で開く
+      </button>
+    </>
   );
 }
