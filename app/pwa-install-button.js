@@ -46,8 +46,25 @@ export default function PwaInstallButton() {
     }
   }
 
+  function openAppWindow() {
+    const appUrl = new URL("/", window.location.origin);
+    appUrl.searchParams.set("guest", "1");
+    window.open(
+      appUrl.toString(),
+      "_blank",
+      "popup=yes,width=420,height=840,left=80,top=80,noopener,noreferrer",
+    );
+  }
+
   if (installed) {
-    return <span className="install-status">ブラウザアプリで起動中</span>;
+    return (
+      <>
+        <span className="install-status">ブラウザアプリで起動中</span>
+        <button className="button button--light" onClick={openAppWindow} type="button">
+          別窓で開く
+        </button>
+      </>
+    );
   }
 
   if (installPrompt && !promptUsed) {
