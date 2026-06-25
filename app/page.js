@@ -1,5 +1,6 @@
 import LocalUsagePanel from "./local-usage-panel";
 import ManualPlanSettings from "./manual-plan-settings";
+import PwaInstallButton from "./pwa-install-button";
 
 function Dashboard() {
   return (
@@ -11,6 +12,7 @@ function Dashboard() {
         </div>
         <div className="account">
           <span>ログインなしで利用できます</span>
+          <PwaInstallButton />
           <a
             className="button button--light"
             href="/projects"

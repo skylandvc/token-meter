@@ -1,14 +1,32 @@
 import "./globals.css";
+import PwaServiceWorker from "./pwa-service-worker";
 
 export const metadata = {
   title: "Token Meter",
-  description: "Public token usage dashboard for Codex and Claude Code.",
+  description: "Codex / Claude Code / Cursor のローカルトークン使用量を確認するダッシュボードです。",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/icons/icon.svg",
+    apple: "/icons/icon.svg",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Token Meter",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport = {
+  themeColor: "#1a2332",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body>
+        <PwaServiceWorker />
+        {children}
+      </body>
     </html>
   );
 }
