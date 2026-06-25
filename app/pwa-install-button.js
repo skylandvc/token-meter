@@ -62,7 +62,7 @@ export default function PwaInstallButton() {
       <>
         <span className="install-status">ブラウザアプリで起動中</span>
         <button className="button button--light" onClick={openAppWindow} type="button">
-          小窓で開く
+          アプリを別で開く
         </button>
       </>
     );
@@ -75,7 +75,7 @@ export default function PwaInstallButton() {
           ブラウザに追加
         </button>
         <button className="button button--light" onClick={openAppWindow} type="button">
-          小窓で開く
+          アプリを別で開く
         </button>
       </>
     );
@@ -87,7 +87,7 @@ export default function PwaInstallButton() {
         追加手順
       </a>
       <button className="button button--light" onClick={openAppWindow} type="button">
-        小窓で開く
+        アプリを別で開く
       </button>
     </>
   );
