@@ -5,6 +5,9 @@
   "start_url": "/?guest=1",
   "scope": "/",
   "display": "standalone",
+  "launch_handler": {
+    "client_mode": "navigate-new"
+  },
   "background_color": "#eceef3",
   "theme_color": "#1a2332",
   "orientation": "any",
