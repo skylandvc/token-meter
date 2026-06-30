@@ -338,15 +338,15 @@ function TodayPanel({ usage }) {
         </p>
       </div>
       <div className="today-split">
-        <article className="today-source today-source--claude">
-          <span>Claude Code</span>
-          <strong>{formatTokens(claudeToday.total)}</strong>
-          <small>このPC / {claudeToday.events || 0} events</small>
-        </article>
         <article className="today-source today-source--codex">
           <span>Codex</span>
           <strong>{formatTokens(codexToday.total)}</strong>
           <small>このPC / {codexToday.events || 0} events</small>
+        </article>
+        <article className="today-source today-source--claude">
+          <span>Claude Code</span>
+          <strong>{formatTokens(claudeToday.total)}</strong>
+          <small>このPC / {claudeToday.events || 0} events</small>
         </article>
       </div>
     </section>
@@ -551,33 +551,33 @@ function FullLocalDashboard({ usage }) {
     <>
       <section className="capacity-grid">
         <CapacityCard
-          title="Claude Code Capacity"
-          label="Claude Code"
-          capacity={usage.capacity?.claude}
-          tone="claude"
-        />
-        <CapacityCard
           title="Codex Capacity"
           label="Codex"
           capacity={usage.capacity?.codex}
           tone="codex"
+        />
+        <CapacityCard
+          title="Claude Code Capacity"
+          label="Claude Code"
+          capacity={usage.capacity?.claude}
+          tone="claude"
         />
       </section>
       <TodayPanel usage={usage} />
       <MetricTiles usage={usage} />
       <section className="agent-grid">
         <AgentPanel
-          title="Claude Code Usage"
-          label="Claude Code"
-          source={usage.sources?.claude}
-          tone="claude"
-          activeDays={activeDays}
-        />
-        <AgentPanel
           title="Codex Usage"
           label="Codex"
           source={usage.sources?.codex}
           tone="codex"
+          activeDays={activeDays}
+        />
+        <AgentPanel
+          title="Claude Code Usage"
+          label="Claude Code"
+          source={usage.sources?.claude}
+          tone="claude"
           activeDays={activeDays}
         />
       </section>

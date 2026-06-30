@@ -135,6 +135,11 @@ h2 {
   background: #0f172a;
 }
 
+.button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
 .button--light {
   background: var(--panel);
   color: var(--ink);
@@ -142,6 +147,16 @@ h2 {
 
 .button--light:hover {
   background: var(--surface-muted);
+}
+
+.button--light:disabled:hover {
+  background: var(--panel);
+}
+
+.window-pin--active {
+  border-color: rgba(37, 99, 235, 0.34);
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--blue);
 }
 
 .text-link {
@@ -1345,6 +1360,126 @@ h2 {
 
   .hero-copy strong {
     font-size: 2rem;
+  }
+}
+
+@media (max-width: 380px) {
+  body {
+    min-width: 240px;
+  }
+
+  .shell {
+    padding-top: 6px;
+  }
+
+  .topbar {
+    display: grid;
+    grid-template-columns: minmax(72px, 0.5fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+  }
+
+  .topbar h1 {
+    max-width: 74px;
+    overflow-wrap: anywhere;
+  }
+
+  .account {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 5px;
+  }
+
+  .account > span:first-child,
+  .install-status,
+  .text-link {
+    display: none;
+  }
+
+  .button {
+    width: 100%;
+    min-height: 30px;
+    padding: 0 6px;
+    font-size: 0.66rem;
+    line-height: 1.1;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .local-toolbar__actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .capacity-card {
+    padding: 9px 7px;
+  }
+
+  .capacity-card__head {
+    gap: 6px;
+  }
+
+  .capacity-card__head h2 {
+    font-size: 0.88rem;
+  }
+
+  .capacity-window {
+    padding: 7px;
+  }
+
+  .capacity-window__text strong,
+  .capacity-window > b {
+    font-size: 0.76rem;
+    white-space: normal;
+  }
+
+  .capacity-window__text span {
+    font-size: 0.62rem;
+  }
+
+  .today-source {
+    padding: 10px;
+  }
+
+  .today-source strong {
+    font-size: 1.55rem;
+  }
+}
+
+@media (max-width: 300px) {
+  body {
+    min-width: 220px;
+    font-size: 0.7rem;
+  }
+
+  .topbar {
+    grid-template-columns: 64px minmax(0, 1fr);
+    padding: 8px 6px;
+  }
+
+  .topbar h1 {
+    max-width: 60px;
+    font-size: 0.98rem;
+  }
+
+  .button {
+    min-height: 28px;
+    font-size: 0.6rem;
+  }
+
+  .capacity-card__head {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .capacity-card__head > span {
+    justify-self: start;
+  }
+
+  .hero-copy strong {
+    font-size: 1.65rem;
   }
 }
 

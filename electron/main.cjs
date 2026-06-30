@@ -1,4 +1,5 @@
-const { app, BrowserWindow, shell } = require("electron");
+const path = require("path");
+const { app, BrowserWindow, ipcMain, shell } = require("electron");
 
 const DEFAULT_APP_URL = "https://token-meterz.vercel.app/?guest=1";
 
@@ -32,6 +33,7 @@ function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      preload: path.join(__dirname, "preload.cjs"),
       sandbox: true,
     },
   });
@@ -55,6 +57,18 @@ function createWindow() {
 }
 
 app.setName("Token Meter");
+
+ipcMain.handle("window:get-always-on-top", (event) => {
+  const window = BrowserWindow.fromWebContents(event.sender);
+  return Boolean(window?.isAlwaysOnTop());
+});
+
+ipcMain.handle("window:set-always-on-top", (event, enabled) => {
+  const window = BrowserWindow.fromWebContents(event.sender);
+  if (!window) return false;
+  window.setAlwaysOnTop(Boolean(enabled), "floating");
+  return window.isAlwaysOnTop();
+});
 
 app.whenReady().then(() => {
   createWindow();
