@@ -2,6 +2,7 @@ import LocalUsagePanel from "./local-usage-panel";
 import ManualPlanSettings from "./manual-plan-settings";
 import PwaInstallButton from "./pwa-install-button";
 import DesktopWindowControls from "./desktop-window-controls";
+import ReloadButton from "./reload-button";
 
 const DESKTOP_DOWNLOAD_URL = "https://github.com/skylandvc/token-meter/releases/tag/desktop-v0.1.0";
 
@@ -17,6 +18,7 @@ function Dashboard() {
           <span>ログインなしで利用できます</span>
           <PwaInstallButton />
           <DesktopWindowControls />
+          <ReloadButton />
           <a
             className="button"
             href={DESKTOP_DOWNLOAD_URL}
